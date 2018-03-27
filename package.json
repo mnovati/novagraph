@@ -1,0 +1,15 @@
+{
+  "name": "novagraph",
+  "version": "0.0.1",
+  "description": "graph storage implementation with privacy and permission",
+  "main": "main.js",
+  "dependencies": {
+    "uuid": "^3.2.1",
+    "mysql2": "^1.5.3",
+    "cognito-express": "^2.0.9"
+  },
+  "engines": {
+    "node": "^5.11.0"
+  },
+  "devDependencies": {}
+}
