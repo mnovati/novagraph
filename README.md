@@ -40,18 +40,21 @@ NovaGraph.COGNITO.init({
   tokenUse: "access",
   tokenExpiration: 3600000
 });
-NovaGraph.PRIVACY.init({
-  can_see_object: (viewer, object) => true,
-  can_create_object: (viewer, type) => true,
-  can_modify_object: (viewer, object) => true,
-  can_see_edge: (viewer, edge) => true,
-  can_create_edge: (viewer, edge) => true,
-  can_modify_edge: (viewer, edge) => true,
+NovaGraph.CONSTANTS.setObjectTypes({
+  PROFILE: 0
+});
+NovaGraph.CONSTANTS.setObjectMap({
+  O: GObject
+});
+NovaGraph.CONSTANTS.setEdgeTypes({
+  FOLLOW: 0
+});
+NovaGraph.CONSTANTS.setObjectMap({
+  O: GEdge
 });
 
-NOTE: for Privacy, you'll want to replace those callbacks with your own privacy schema. You'll
-likely want different rules for different types of Objects and Edges so you can choose a 
-code design that will work for your use case. In this example, everyone can read and write everything.
+NOTE: for Privacy, you'll need to subclass GObject and GEdge for given types, and implement
+appropriate privacy rules. By default everyone can see and do anything.
 
 ==USAGE==
 
