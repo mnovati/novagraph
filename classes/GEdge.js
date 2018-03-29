@@ -5,6 +5,10 @@ class GEdge {
     this.edge = edge;
   }
 
+  getViewer() {
+    return this.viewer;
+  }
+
   getID1() {
     return this.edge.id1;
   }
@@ -26,15 +30,15 @@ class GEdge {
   }
 
   async canSee() {
-    return true;
+    return false;
   }
 
   async canCreate() {
-    return true;
+    return false;
   }
 
   async canModify() {
-    return true;
+    return false;
   }
 }
 

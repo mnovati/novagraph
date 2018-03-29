@@ -5,6 +5,10 @@ class GObject {
     this.object = object;
   }
 
+  getViewer() {
+    return this.viewer;
+  }
+
   getID() {
     return this.object.id;
   }
@@ -22,15 +26,15 @@ class GObject {
   }
 
   async canSee() {
-    return true;
+    return false;
   }
 
   async canCreate() {
-    return true;
+    return false;
   }
 
   async canModify() {
-    return true;
+    return false;
   }
 }
 
