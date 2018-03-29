@@ -5,6 +5,7 @@
   "main": "main.js",
   "dependencies": {
     "uuid": "^3.2.1",
+    "uuid-validate": "^0.0.2",
     "mysql2": "^1.5.3",
     "cognito-express": "^2.0.9"
   },
