@@ -8,13 +8,11 @@ class GViewerWriteEdge extends GEdge {
   }
 
   async canCreate() {
-    return this.getViewer().getID() === this.getID1() ||
-      this.getViewer().getID() === this.getID2();
+    return await this.canSee();
   }
 
   async canModify() {
-    return this.getViewer().getID() === this.getID1() ||
-      this.getViewer().getID() === this.getID2();
+    return await this.canSee();
   }
 }
 

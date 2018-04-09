@@ -7,11 +7,11 @@ class GViewerSourceWriteEdge extends GEdge {
   }
 
   async canCreate() {
-    return this.getViewer().getID() === this.getID1();
+    return await this.canSee();
   }
 
   async canModify() {
-    return this.getViewer().getID() === this.getID1();
+    return await this.canSee();
   }
 }
 

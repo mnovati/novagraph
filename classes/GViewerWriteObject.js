@@ -12,8 +12,7 @@ class GViewerWriteObject extends GObject {
   }
 
   async canModify() {
-    return this.getViewer().getID() === this.getID() ||
-      this.getViewer().getID() === this.getData().creator_id;
+    return await this.canSee();
   }
 }
 
