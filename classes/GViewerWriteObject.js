@@ -8,7 +8,7 @@ class GViewerWriteObject extends GObject {
   }
 
   async canCreate() {
-    return false;
+    return await this.canSee();
   }
 
   async canModify() {
