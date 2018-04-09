@@ -52,14 +52,14 @@ DROP TABLE IF EXISTS `edges`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `edges` (
-  `id1` binary(16) DEFAULT NULL,
+  `from_id` binary(16) DEFAULT NULL,
   `type` smallint(5) unsigned DEFAULT NULL,
-  `id2` binary(16) DEFAULT NULL,
+  `to_id` binary(16) DEFAULT NULL,
   `data` varchar(255) DEFAULT NULL,
   `time_created` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `time_updated` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `status` smallint(6) DEFAULT NULL,
-  KEY `id1type` (`id1`,`type`)
+  KEY `fromidtype` (`from_id`,`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

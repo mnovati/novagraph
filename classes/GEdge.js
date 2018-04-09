@@ -9,12 +9,12 @@ class GEdge {
     return this.viewer;
   }
 
-  getID1() {
-    return this.edge.id1;
+  getFromID() {
+    return this.edge.from_id;
   }
 
-  getID2() {
-    return this.edge.id2;
+  getToID() {
+    return this.edge.to_id;
   }
 
   getType() {
