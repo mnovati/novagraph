@@ -1,3 +1,4 @@
+const DB = require('../lib/db.js');
 const GEdge = require('./GEdge.js');
 
 class GDestObjectCreatorWriteEdge extends GEdge {
