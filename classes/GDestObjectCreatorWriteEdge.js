@@ -15,11 +15,8 @@ class GDestObjectCreatorWriteEdge extends GEdge {
     ]);
     if (!dest || !source) {
       return false;
-    }{
-    var [dest_data, source_data] = await Promise.all([
-      dest.getData(),
-      source.getData()
-    ]);
+    }
+    var [dest_data, source_data] = await Promise.all([dest.getData(), source.getData()]);
     return dest_data.creator_id === this.getViewer().getID() ||
       source_data.creator_id === this.getViewer().getID();
   }
