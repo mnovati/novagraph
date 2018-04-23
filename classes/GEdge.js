@@ -25,7 +25,7 @@ class GEdge {
     return this.edge.data ? this.edge.data : '';
   }
 
-  getRaw() {
+  async getRaw() {
     return this.edge;
   }
 

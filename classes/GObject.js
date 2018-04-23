@@ -17,11 +17,11 @@ class GObject {
     return this.object.type;
   }
 
-  getData() {
+  async getData() {
     return this.object.data;
   }
 
-  getRaw() {
+  async getRaw() {
     return this.object;
   }
 

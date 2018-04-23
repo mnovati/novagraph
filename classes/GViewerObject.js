@@ -3,8 +3,11 @@ const GObject = require('./GObject.js');
 class GViewerObject extends GObject {
 
   async canSee() {
-    return this.getViewer().getID() === this.getID() ||
-      this.getViewer().getID() === this.getData().creator_id;
+    if (this.getViewer().getID() === this.getID()) {
+      return true;
+    }
+    var data = await this.getData();
+    return this.getViewer().getID() === data.creator_id;
   }
 
   async canCreate() {

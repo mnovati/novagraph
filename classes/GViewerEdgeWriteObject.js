@@ -7,8 +7,11 @@ const ReadAllViewer = require('./ReadAllViewer.js');
 class GViewerEdgeWriteObject extends GObject {
 
   async canSee() {
-    if (this.getViewer().getID() === this.getID() ||
-        this.getViewer().getID() === this.getData().creator_id) {
+    if (this.getViewer().getID() === this.getID()) {
+      return true;
+    }
+    var data = await this.getData();
+    if (this.getViewer().getID() === data.creator_id) {
       return true;
     }
     var edges = Constants.Objects[this.getType()].instance_config;
