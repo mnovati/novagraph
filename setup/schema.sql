@@ -105,5 +105,19 @@ CREATE TABLE `indices` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Table structure for table `geo_indices`
+--
 
--- Dump completed on 2018-03-27  3:50:24
+DROP TABLE IF EXISTS `geoindices`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `geoindices` (
+  `id` binary(26) NOT NULL,
+  `type` smallint(5) unsigned DEFAULT NULL,
+  `shape` geometry NOT NULL,
+  PRIMARY KEY (`id`),
+  SPATIAL KEY `shape` (`shape`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
