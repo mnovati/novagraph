@@ -7,7 +7,8 @@ const ReadAllViewer = require('./ReadAllViewer.js');
 class GViewerEdgeObject extends GObject {
 
   async _canSee() {
-    if (await this._isViewerOrCreator()) {
+    var isViewerOrCreator = await this._isViewerOrCreator();
+    if (isViewerOrCreator) {
       return true;
     }
     return await this._viewerEdgeConnected();
