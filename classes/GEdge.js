@@ -66,7 +66,7 @@ class GEdge {
   }
 }
 
-GEdge._globalCanSee = function(edge) {
+GEdge._globalCanSee = async function(edge) {
   return true;
 }
 

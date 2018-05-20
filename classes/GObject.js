@@ -62,7 +62,7 @@ class GObject {
   }
 }
 
-GObject._globalCanSee = function(object) {
+GObject._globalCanSee = async function(object) {
   return true;
 }
 
