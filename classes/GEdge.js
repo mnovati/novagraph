@@ -32,11 +32,11 @@ class GEdge {
   // these are functions used internally that shouldn't be overwritten
 
   static setGlobalCanSee(fun) {
-    this._globalCanSee = fun;
+    GEdge._globalCanSee = fun;
   }
 
   async canSee() {
-    var global = await this._globalCanSee(this);
+    var global = await GEdge._globalCanSee(this);
     if (!global) {
       return false;
     }
