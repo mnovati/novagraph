@@ -2,15 +2,15 @@ const GObject = require('./GObject.js');
 
 class GPublicObject extends GObject {
 
-  async canSee() {
+  async _canSee() {
     return true;
   }
 
-  async canCreate() {
+  async _canCreate() {
     return false;
   }
 
-  async canModify() {
+  async _canModify() {
     return false;
   }
 }

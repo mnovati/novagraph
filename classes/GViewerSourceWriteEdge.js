@@ -2,15 +2,15 @@ const GEdge = require('./GEdge.js');
 
 class GViewerSourceWriteEdge extends GEdge {
 
-  async canSee() {
+  async _canSee() {
     return this.getViewer().getID() === this.getFromID();
   }
 
-  async canCreate() {
+  async _canCreate() {
     return await this.canSee();
   }
 
-  async canModify() {
+  async _canModify() {
     return await this.canSee();
   }
 }

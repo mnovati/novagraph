@@ -55,7 +55,7 @@ CREATE TABLE `edges` (
   `from_id` binary(16) DEFAULT NULL,
   `type` smallint(5) unsigned DEFAULT NULL,
   `to_id` binary(16) DEFAULT NULL,
-  `data` varchar(255) DEFAULT NULL,
+  `data` varchar(1024) DEFAULT NULL,
   `time_created` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `time_updated` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `status` smallint(6) DEFAULT NULL,

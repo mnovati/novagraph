@@ -2,16 +2,16 @@ const GEdge = require('./GEdge.js');
 
 class GPublicViewerWriteEdge extends GEdge {
 
-  async canSee() {
+  async _canSee() {
     return true;
   }
 
-  async canCreate() {
+  async _canCreate() {
     return this.getViewer().getID() === this.getToID() ||
       this.getViewer().getID() === this.getFromID();
   }
 
-  async canModify() {
+  async _canModify() {
     return await this.canCreate();
   }
 }

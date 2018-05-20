@@ -29,15 +29,31 @@ class GEdge {
     return this.edge;
   }
 
+  // these are functions used internally that shouldn't be overwritten
+
   async canSee() {
-    return false;
+    return await this.canSee();
   }
 
   async canCreate() {
-    return false;
+    return await this.canCreate();
   }
 
   async canModify() {
+    return await this.canModify();
+  }
+
+  // these are functions you should overwrite in your extensions of this object
+
+  async _canSee() {
+    return false;
+  }
+
+  async _canCreate() {
+    return false;
+  }
+
+  async _canModify() {
     return false;
   }
 }

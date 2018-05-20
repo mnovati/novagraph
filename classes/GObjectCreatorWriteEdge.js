@@ -3,7 +3,7 @@ const GEdge = require('./GEdge.js');
 
 class GObjectCreatorWriteEdge extends GEdge {
 
-  async canSee() {
+  async _canSee() {
     var [dest, source] = await Promise.all([
       DB.getObject(this.getViewer(), this.getToID()),
       DB.getObject(this.getViewer(), this.getFromID()),
@@ -19,11 +19,11 @@ class GObjectCreatorWriteEdge extends GEdge {
       source_data.creator_id === this.getViewer().getID();
   }
 
-  async canCreate() {
+  async _canCreate() {
     return await this.canSee();
   }
 
-  async canModify() {
+  async _canModify() {
     return await this.canSee();
   }
 }

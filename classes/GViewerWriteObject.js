@@ -2,7 +2,7 @@ const GObject = require('./GObject.js');
 
 class GViewerWriteObject extends GObject {
 
-  async canSee() {
+  async _canSee() {
     if (this.getViewer().getID() === this.getID()) {
       return true;
     }
@@ -10,11 +10,11 @@ class GViewerWriteObject extends GObject {
     return this.getViewer().getID() === data.creator_id;
   }
 
-  async canCreate() {
+  async _canCreate() {
     return await this.canSee();
   }
 
-  async canModify() {
+  async _canModify() {
     return await this.canSee();
   }
 }

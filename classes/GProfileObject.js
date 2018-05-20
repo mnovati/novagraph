@@ -2,15 +2,15 @@ const GObject = require('./GObject.js');
 
 class GProfileObject extends GObject {
 
-  async canSee() {
+  async _canSee() {
     return this.getViewer().getID() === this.getID();
   }
 
-  async canCreate() {
+  async _canCreate() {
     return false;
   }
 
-  async canModify() {
+  async _canModify() {
     return this.getViewer().getID() === this.getID();
   }
 }

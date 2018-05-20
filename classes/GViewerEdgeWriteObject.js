@@ -6,7 +6,7 @@ const ReadAllViewer = require('./ReadAllViewer.js');
 
 class GViewerEdgeWriteObject extends GObject {
 
-  async canSee() {
+  async _canSee() {
     if (this.getViewer().getID() === this.getID()) {
       return true;
     }
@@ -25,11 +25,11 @@ class GViewerEdgeWriteObject extends GObject {
     return result.filter(Boolean).length > 0;
   }
 
-  async canCreate() {
+  async _canCreate() {
     return true;
   }
 
-  async canModify() {
+  async _canModify() {
     return await this.canSee();
   }
 }

@@ -2,15 +2,15 @@ const GEdge = require('./GEdge.js');
 
 class GPublicEdge extends GEdge {
 
-  async canSee() {
+  async _canSee() {
     return true;
   }
 
-  async canCreate() {
+  async _canCreate() {
     return false;
   }
 
-  async canModify() {
+  async _canModify() {
     return false;
   }
 }

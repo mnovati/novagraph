@@ -2,11 +2,11 @@ const GObject = require('./GObject.js');
 
 class GPublicViewerWriteObject extends GObject {
 
-  async canSee() {
+  async _canSee() {
     return true;
   }
 
-  async canCreate() {
+  async _canCreate() {
     if (this.getViewer().getID() === this.getID()) {
       return true;
     }
@@ -14,7 +14,7 @@ class GPublicViewerWriteObject extends GObject {
     return this.getViewer().getID() === data.creator_id;
   }
 
-  async canModify() {
+  async _canModify() {
     return await this.canCreate();
   }
 }

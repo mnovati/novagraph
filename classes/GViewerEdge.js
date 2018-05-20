@@ -2,16 +2,16 @@ const GEdge = require('./GEdge.js');
 
 class GViewerEdge extends GEdge {
 
-  async canSee() {
+  async _canSee() {
     return this.getViewer().getID() === this.getFromID() ||
       this.getViewer().getID() === this.getToID();
   }
 
-  async canCreate() {
+  async _canCreate() {
     return false;
   }
 
-  async canModify() {
+  async _canModify() {
     return false;
   }
 }
