@@ -31,7 +31,15 @@ class GEdge {
 
   // these are functions used internally that shouldn't be overwritten
 
+  static setGlobalCanSee(fun) {
+    this._globalCanSee = fun;
+  }
+
   async canSee() {
+    var global = await this._globalCanSee(this);
+    if (!global) {
+      return false;
+    }
     return await this._canSee();
   }
 
@@ -56,6 +64,10 @@ class GEdge {
   async _canModify() {
     return false;
   }
+}
+
+GEdge._globalCanSee = function(edge) {
+  return true;
 }
 
 module.exports = GEdge;
