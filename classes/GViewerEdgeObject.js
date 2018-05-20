@@ -7,10 +7,10 @@ const ReadAllViewer = require('./ReadAllViewer.js');
 class GViewerEdgeObject extends GObject {
 
   async _canSee() {
-    if (this._isViewerOrCreator()) {
+    if (await this._isViewerOrCreator()) {
       return true;
     }
-    return this._viewerEdgeConnected();
+    return await this._viewerEdgeConnected();
   }
 
   async _canCreate() {
@@ -21,11 +21,11 @@ class GViewerEdgeObject extends GObject {
     return await this.canSee();
   }
 
-  _isViewerOrCreator() {
+  async _isViewerOrCreator() {
     if (this.getViewer().getID() === this.getID()) {
       return true;
     }
-    var data = this.getData();
+    var data = await this.getData();
     if (this.getViewer().getID() === data.creator_id) {
       return true;
     }
