@@ -6,7 +6,7 @@ const ReadAllViewer = require('./ReadAllViewer.js');
 
 class GViewerEdgeObject extends GObject {
 
-  async _canSee() {
+  async _canSeeCustom() {
     var isViewerOrCreator = await this._isViewerOrCreator();
     if (isViewerOrCreator) {
       return true;
@@ -14,11 +14,11 @@ class GViewerEdgeObject extends GObject {
     return await this._viewerEdgeConnected();
   }
 
-  async _canCreate() {
+  async _canCreateCustom() {
     return true;
   }
 
-  async _canModify() {
+  async _canModifyCustom() {
     return await this.canSee();
   }
 

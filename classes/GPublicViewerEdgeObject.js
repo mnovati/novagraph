@@ -2,11 +2,11 @@ const GViewerEdgeObject = require('./GViewerEdgeObject.js');
 
 class GPublicViewerEdgeObject extends GViewerEdgeObject {
 
-  async _canSee() {
+  async _canSeeCustom() {
     return true;
   }
 
-  async _canCreate() {
+  async _canCreateCustom() {
     return true;
   }
 

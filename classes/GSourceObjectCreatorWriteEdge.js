@@ -3,12 +3,12 @@ const GEdge = require('./GEdge.js');
 
 class GSourceObjectCreatorWriteEdge extends GEdge {
 
-  async _canSee() {
+  async _canSeeCustom() {
     var object = await DB.getObject(this.getViewer(), this.getFromID());
     return !!object;
   }
 
-  async _canCreate() {
+  async _canCreateCustom() {
     var [dest, source] = await Promise.all([
       DB.getObject(this.getViewer(), this.getToID()),
       DB.getObject(this.getViewer(), this.getFromID()),
@@ -24,7 +24,7 @@ class GSourceObjectCreatorWriteEdge extends GEdge {
       source_data.creator_id === this.getViewer().getID();
   }
 
-  async _canModify() {
+  async _canModifyCustom() {
     return await this.canCreate();
   }
 }

@@ -28,28 +28,28 @@ class GObject {
   // these are functions used internally that shouldn't be overwritten
 
   async canSee() {
-    return await this._canSee();
+    return await this._canSeeCustom();
   }
 
   async canCreate() {
-    return await this._canCreate();
+    return await this._canCreateCustom();
   }
 
   async canModify() {
-    return await this._canModify();
+    return await this._canModifyCustom();
   }
 
   // these are functions you should overwrite in your extensions of this object
 
-  async _canSee() {
+  async _canSeeCustom() {
     return false;
   }
 
-  async _canCreate() {
+  async _canCreateCustom() {
     return false;
   }
 
-  async _canModify() {
+  async _canModifyCustom() {
     return false;
   }
 }
