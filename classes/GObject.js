@@ -27,15 +27,7 @@ class GObject {
 
   // these are functions used internally that shouldn't be overwritten
 
-  static setGlobalCanSee(fun) {
-    GObject._globalCanSee = fun;
-  }
-
   async canSee() {
-    var global = await GObject._globalCanSee(this);
-    if (!global) {
-      return false;
-    }
     return await this._canSee();
   }
 
@@ -60,10 +52,6 @@ class GObject {
   async _canModify() {
     return false;
   }
-}
-
-GObject._globalCanSee = async function(object) {
-  return true;
 }
 
 module.exports = GObject;
