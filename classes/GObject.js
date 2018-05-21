@@ -30,54 +30,33 @@ class GObject {
   async canSee() {
     const Constants = require('../lib/constants.js');
     return await this._can(
-      (Constants.Objects[this.getType()].privacy || {}).cansee || [],
-      this._canSeeCustom.bind(this)
+      (Constants.Objects[this.getType()].privacy || {}).cansee || []
     );
   }
 
   async canCreate() {
     const Constants = require('../lib/constants.js');
     return await this._can(
-      (Constants.Objects[this.getType()].privacy || {}).cancreate || [],
-      this._canCreateCustom.bind(this)
+      (Constants.Objects[this.getType()].privacy || {}).cancreate || []
     );
   }
 
   async canModify() {
     const Constants = require('../lib/constants.js');
     return await this._can(
-      (Constants.Objects[this.getType()].privacy || {}).canmodify || [],
-      this._canModifyCustom.bind(this)
+      (Constants.Objects[this.getType()].privacy || {}).canmodify || []
     );
   }
 
   async _can(rules, fallback) {
-    if (rules.length > 0) {
-      for (var ii = 0; ii < rules.length; ii++) {
-        var result = await rules[ii].can(this);
-        if (result === 'PASS') {
-          return true;
-        } else if (result === 'FAIL') {
-          return false;
-        }
+    for (var ii = 0; ii < rules.length; ii++) {
+      var result = await rules[ii].can(this);
+      if (result === 'PASS') {
+        return true;
+      } else if (result === 'FAIL') {
+        return false;
       }
-      return false;
-    } else {
-      return await fallback();
     }
-  }
-
-  // these are functions you should overwrite in your extensions of this object
-
-  async _canSeeCustom() {
-    return false;
-  }
-
-  async _canCreateCustom() {
-    return false;
-  }
-
-  async _canModifyCustom() {
     return false;
   }
 }
