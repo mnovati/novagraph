@@ -1,5 +1,3 @@
-const Constants = require('../lib/constants.js');
-
 class GObject {
 
   constructor(viewer, object) {
@@ -30,6 +28,7 @@ class GObject {
   // these are functions used internally that shouldn't be overwritten
 
   async canSee() {
+    const Constants = require('../lib/constants.js');
     return await this._can(
       (Constants.Objects[this.getType()].privacy || {}).cansee || [],
       this._canSeeCustom.bind(this)
@@ -37,6 +36,7 @@ class GObject {
   }
 
   async canCreate() {
+    const Constants = require('../lib/constants.js');
     return await this._can(
       (Constants.Objects[this.getType()].privacy || {}).cancreate || [],
       this._canCreateCustom.bind(this)
@@ -44,6 +44,7 @@ class GObject {
   }
 
   async canModify() {
+    const Constants = require('../lib/constants.js');
     return await this._can(
       (Constants.Objects[this.getType()].privacy || {}).canmodify || [],
       this._canModifyCustom.bind(this)

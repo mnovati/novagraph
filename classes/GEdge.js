@@ -32,6 +32,7 @@ class GEdge {
   // these are functions used internally that shouldn't be overwritten
 
   async canSee() {
+    const Constants = require('../lib/constants.js');
     return await this._can(
       (Constants.Edges[this.getType()].privacy || {}).cansee || [],
       this._canSeeCustom.bind(this)
@@ -39,6 +40,7 @@ class GEdge {
   }
 
   async canCreate() {
+    const Constants = require('../lib/constants.js');
     return await this._can(
       (Constants.Edges[this.getType()].privacy || {}).cancreate || [],
       this._canCreateCustom.bind(this)
@@ -46,6 +48,7 @@ class GEdge {
   }
 
   async canModify() {
+    const Constants = require('../lib/constants.js');
     return await this._can(
       (Constants.Edges[this.getType()].privacy || {}).canmodify || [],
       this._canModifyCustom.bind(this)
