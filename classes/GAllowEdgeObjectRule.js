@@ -4,6 +4,7 @@ const GRule = require('./GRule.js');
 class GAllowEdgeObjectRule extends GRule {
 
   constructor(edges) {
+    super(this);
     this.edges = edges;
   }
 
