@@ -1,3 +1,5 @@
+const Constants = require('../lib/constants.js');
+
 class GObject {
 
   constructor(viewer, object) {
@@ -28,15 +30,40 @@ class GObject {
   // these are functions used internally that shouldn't be overwritten
 
   async canSee() {
-    return await this._canSeeCustom();
+    return await this._can(
+      (Constants.Objects[this.getType()].privacy || {}).cansee || [],
+      this._canSeeCustom.bind(this)
+    );
   }
 
   async canCreate() {
-    return await this._canCreateCustom();
+    return await this._can(
+      (Constants.Objects[this.getType()].privacy || {}).cancreate || [],
+      this._canCreateCustom.bind(this)
+    );
   }
 
   async canModify() {
-    return await this._canModifyCustom();
+    return await this._can(
+      (Constants.Objects[this.getType()].privacy || {}).canmodify || [],
+      this._canModifyCustom.bind(this)
+    );
+  }
+
+  async _can(rules, fallback) {
+    if (rules.length > 0) {
+      for (var ii = 0; ii < rules.length; ii++) {
+        var result = await rules[ii].can(this);
+        if (result === 'PASS') {
+          return true;
+        } else if (result === 'FAIL') {
+          return false;
+        }
+      }
+      return false;
+    } else {
+      return await fallback();
+    }
   }
 
   // these are functions you should overwrite in your extensions of this object
