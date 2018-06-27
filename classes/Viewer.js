@@ -3,6 +3,7 @@ class Viewer {
   constructor(viewer_id) {
     this.id = viewer_id;
     this.cache = {};
+    this.readAll = null;
   }
 
   getID() {
@@ -31,6 +32,14 @@ class Viewer {
 
   deleteCache(key) {
     delete this.cache[key];
+  }
+
+  getReadAllViewer() {
+    if (this.readAll === null) {
+      const ReadAllViewer = require('./ReadAllViewer.js');
+      this.readAll = new ReadAllViewer(this.id);
+    }
+    return this.readAll;
   }
 }
 
