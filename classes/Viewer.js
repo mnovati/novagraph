@@ -3,6 +3,7 @@ class Viewer {
   constructor(viewer_id) {
     this.id = viewer_id;
     this.cache = {};
+    this.pending = {};
     this.readAll = null;
   }
 
@@ -32,6 +33,18 @@ class Viewer {
 
   deleteCache(key) {
     delete this.cache[key];
+  }
+
+  existsPending(key) {
+    return key in this.pending;
+  }
+
+  setPending(key) {
+    this.pending[key] = true;
+  }
+
+  deletePending(key) {
+    delete this.pending[key];
   }
 
   getReadAllViewer() {
