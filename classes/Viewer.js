@@ -35,6 +35,9 @@ class Viewer {
   }
 
   getReadAllViewer() {
+    if (this.isReadAll()) {
+      return this;
+    }
     if (this.readAll === null) {
       const ReadAllViewer = require('./ReadAllViewer.js');
       this.readAll = new ReadAllViewer(this.id);
