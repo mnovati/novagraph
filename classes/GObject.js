@@ -30,21 +30,21 @@ class GObject {
   async canSee() {
     const Constants = require('../lib/constants.js');
     return await this._can(
-      (Constants.Objects[this.getType()].privacy || {}).cansee || []
+      (Constants.getObject(this.getType()).privacy || {}).cansee || []
     );
   }
 
   async canCreate() {
     const Constants = require('../lib/constants.js');
     return await this._can(
-      (Constants.Objects[this.getType()].privacy || {}).cancreate || []
+      (Constants.getObject(this.getType()).privacy || {}).cancreate || []
     );
   }
 
   async canModify() {
     const Constants = require('../lib/constants.js');
     return await this._can(
-      (Constants.Objects[this.getType()].privacy || {}).canmodify || []
+      (Constants.getObject(this.getType()).privacy || {}).canmofidy || []
     );
   }
 

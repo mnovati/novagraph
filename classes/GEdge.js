@@ -34,21 +34,21 @@ class GEdge {
   async canSee() {
     const Constants = require('../lib/constants.js');
     return await this._can(
-      (Constants.Edges[this.getType()].privacy || {}).cansee || []
+      (Constants.getEdge(this.getType()).privacy || {}).cansee || []
     );
   }
 
   async canCreate() {
     const Constants = require('../lib/constants.js');
     return await this._can(
-      (Constants.Edges[this.getType()].privacy || {}).cancreate || []
+      (Constants.getEdge(this.getType()).privacy || {}).cancreate || []
     );
   }
 
   async canModify() {
     const Constants = require('../lib/constants.js');
     return await this._can(
-      (Constants.Edges[this.getType()].privacy || {}).canmodify || []
+      (Constants.getEdge(this.getType()).privacy || {}).canmodify || []
     );
   }
 
