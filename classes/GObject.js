@@ -44,7 +44,7 @@ class GObject {
   async canModify() {
     const Constants = require('../lib/constants.js');
     return await this._can(
-      (Constants.getObject(this.getType()).privacy || {}).canmofidy || []
+      (Constants.getObject(this.getType()).privacy || {}).canmodify || []
     );
   }
 
