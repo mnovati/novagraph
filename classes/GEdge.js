@@ -21,6 +21,13 @@ class GEdge {
     return this.edge.type;
   }
 
+  async getAPIType() {
+    const Constants = require('../lib/constants.js');
+    const DB = require('../lib/db.js');
+    var object = DB.getObject(this.getViewer().getReadAllViewer(), this.getFromID());
+    return (object ? object.getAPIType() : 'null') + '/' + Constants.Edges[this.getType()].api_name;
+  }
+
   getData() {
     return this.edge.data ? this.edge.data : '';
   }
