@@ -19,7 +19,7 @@ class GObject {
 
   getAPIType() {
     const Constants = require('../lib/constants.js');
-    Constants.Objects[this.getType()].api_name;
+    return Constants.Objects[this.getType()].api_name;
   }
 
   async getData() {
