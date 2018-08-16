@@ -22,7 +22,7 @@ class GObject {
   }
 
   async getRaw() {
-    return this.object;
+    return Object.assign({}, this.object);
   }
 
   // these are functions used internally that shouldn't be overwritten

@@ -26,7 +26,7 @@ class GEdge {
   }
 
   async getRaw() {
-    return this.edge;
+    return Object.assign({}, this.edge);
   }
 
   // these are functions used internally that shouldn't be overwritten
