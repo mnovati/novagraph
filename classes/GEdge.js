@@ -24,7 +24,7 @@ class GEdge {
   async getAPIType() {
     const Constants = require('../lib/constants.js');
     const DB = require('../lib/db.js');
-    var object = DB.getObject(this.getViewer().getReadAllViewer(), this.getFromID());
+    var object = await DB.getObject(this.getViewer().getReadAllViewer(), this.getFromID());
     return (object ? object.getAPIType() : 'null') + '/' + Constants.Edges[this.getType()].api_name;
   }
 
