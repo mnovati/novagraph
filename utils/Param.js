@@ -1,3 +1,5 @@
+const uuidValidate = require('uuid-validate');
+
 class Param {
 
   constructor(req) {
@@ -15,6 +17,29 @@ class Param {
       return this._req.get('x-token');
     }
     return null;
+  }
+
+  getInt(key) {
+    var value = this.get(key);
+    return value === null ? null : parseInt(value);
+  }
+
+  getStr(key) {
+    var value = this.get(key);
+    return value === null ? null : String(value);
+  }
+
+  getBool(key) {
+    var value = this.get(key);
+    return (this.exists(key) && value === '') ||
+      value === 'true' ||
+      value === true ||
+      parseInt(value) === 1;
+  }
+
+  getUUID(key) {
+    var value = this.getStr(key);
+    return (value && uuidValidate(value)) ? value : null;
   }
 
   exists(key) {
