@@ -19,6 +19,10 @@ class Viewer {
     return false;
   }
 
+  isLoggedOut() {
+    return this.id === 0;
+  }
+
   existsCache(key) {
     return key in this.cache;
   }

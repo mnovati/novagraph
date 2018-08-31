@@ -9,6 +9,9 @@ class GAllowEdgeObjectRule extends GRule {
   }
 
   async can(object) {
+    if (object.getViewer().isLoggedOut()) {
+      return this.skip();
+    }
     const DB = require('../lib/db.js');
     if (!Array.isArray(this.edges)) {
       throw new Error('Invalid edges provided to edge-based privacy rule');
