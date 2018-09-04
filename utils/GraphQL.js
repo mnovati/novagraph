@@ -40,6 +40,10 @@ async function parseSet(ng, DB, viewer, object, nodes) {
             object_ids.push(arg.value.value);
           } else if (arg.name.value === 'ids') {
             arg.value.values.forEach(id => object_ids.push(id.value));
+          } else if (arg.name.value === 'point') {
+            var [lat, lng, distance] = arg.value.values;
+            var matches = await DB.lookupGeoIndex({lat: lat, lng: lng}, [type], (distance || 1) * 1.6 * 1000);
+            (matches || []).forEach(id => object_ids.push(id));
           } else {
             var matches = await DB.lookupIndex(type, arg.name.value, arg.value.value);
             (matches || []).forEach(id => object_ids.push(id));
