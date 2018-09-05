@@ -62,15 +62,19 @@ async function parseSet(ng, DB, viewer, object, nodes) {
       var count = null;
       var offset = null;
       var after = null;
+      var missing = true;
       await Promise.all((node.arguments || []).map(async arg => {
         if (arg.name.value === 'id') {
           object_ids.push(arg.value.value);
+          missing = false;
         } else if (arg.name.value === 'ids') {
           arg.value.values.forEach(id => object_ids.push(id.value));
+          missing = false;
         } else if (arg.name.value === 'point') {
           var [lat, lng, distance] = arg.value.values;
           var matches = await DB.lookupGeoIndex({lat: lat.value, lng: lng.value}, [type], (distance.value || 1) * 1.6 * 1000);
           (matches || []).forEach(id => object_ids.push(id));
+          missing = false;
         } else if (arg.name.value === 'first') {
           count = parseInt(arg.value.value);
         } else if (arg.name.value === 'offset') {
@@ -86,9 +90,10 @@ async function parseSet(ng, DB, viewer, object, nodes) {
         } else {
           var matches = await DB.lookupIndex(type, arg.name.value, arg.value.value);
           (matches || []).forEach(id => object_ids.push(id));
+          missing = false;
         }
       }));
-      if (object_ids.length === 0) {
+      if (missing) {
         var config = ng.CONSTANTS.getObject(type);
         if (!config.root_id) {
           NovaError.throwError('Cannot fetch all objects for given type');
