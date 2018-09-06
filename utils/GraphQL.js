@@ -46,8 +46,8 @@ async function parseSet(ng, DB, viewer, object, nodes) {
       for (var ii = 0; ii < result.length && count > 0; ii++) {
         add = add || (offset !== null && offset === ii);
         if (add) {
-          edges.push(edge);
-          ids_to_fetch[result[ii].getToID()];
+          edges.push(result[ii]);
+          ids_to_fetch[result[ii].getToID()] = true;
           count--;
         }
         add = add || (after !== null && result[ii].getToID() === after);
