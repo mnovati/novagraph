@@ -128,7 +128,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
       if (!objects[object_id]) {
         return;
       }
-      var [more_objects, more_edges] = await parseSet(viewer, objects[object_id], node.selectionSet);
+      var [more_objects, more_edges] = await parseSet(ng, DB, viewer, objects[object_id], node.selectionSet);
       Object.keys(more_objects).map(i => objects[i] = more_objects[i]);
       more_edges.forEach(e => edges.push(e));
     }));
