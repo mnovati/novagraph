@@ -121,3 +121,19 @@ CREATE TABLE `geoindices` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Table structure for table `fts_indices`
+--
+
+DROP TABLE IF EXISTS `ftsindices`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ftsindices` (
+  `id` binary(26) NOT NULL,
+  `type` smallint(5) unsigned NOT NULL,
+  `data` text NOT NULL,
+  PRIMARY KEY (`id`, `type`),
+  INDEX (`type`),
+  FULLTEXT (`data`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
