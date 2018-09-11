@@ -63,6 +63,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
       var offset = null;
       var after = null;
       var missing = true;
+      var index_object_ids = {};
       await Promise.all((node.arguments || []).map(async arg => {
         if (arg.name.value === 'id') {
           object_ids.push(arg.value.value);
@@ -73,7 +74,15 @@ async function parseSet(ng, DB, viewer, object, nodes) {
         } else if (arg.name.value === 'point') {
           var [lat, lng, distance] = arg.value.values;
           var matches = await DB.lookupGeoIndex({lat: lat.value, lng: lng.value}, [type], (distance.value || 1) * 1.6 * 1000);
-          (matches || []).forEach(id => object_ids.push(id));
+          index_object_ids.geo = matches || [];
+          missing = false;
+        } else if (arg.name.value === 'text_index') {
+          var text_indices = ng.CONSTANTS.getObject(type).text_index || {};
+          index_object_ids.text = [];
+          await Promise.all(Object.keys(text_indices).map(async index_type => {
+            var matches = await DB.lookupTextIndex(index_type, arg.value.value);
+            (matches || []).forEach(id => index_object_ids.text.push(id));
+          }));
           missing = false;
         } else if (arg.name.value === 'first') {
           count = parseInt(arg.value.value);
@@ -89,7 +98,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
           }
         } else {
           var matches = await DB.lookupIndex(type, arg.name.value, arg.value.value);
-          (matches || []).forEach(id => object_ids.push(id));
+          index_object_ids[arg.name.value] = matches || [];
           missing = false;
         }
       }));
@@ -101,6 +110,18 @@ async function parseSet(ng, DB, viewer, object, nodes) {
         var edge = await DB.getEdge(viewer, config.root_id, ng.CONSTANTS.ROOT_EDGE);
         edge.forEach(e => object_ids.push(e.getToID()));
       }
+
+      // find intersection of all indices used
+      var to_merge = Object.values(index_object_ids);
+      if (to_merge.length > 0) {
+        var intersection = to_merge.shift();
+        while (to_merge.length > 0) {
+          var next = to_merge.shift();
+          intersection = intersection.filter(x => next.includes(x));
+        }
+        intersection.forEach(id => object_ids.push(id));
+      }
+
       var fetched = [];
       await Promise.all(object_ids.map(async object_id => {
         var object = await DB.getObject(viewer, object_id);
