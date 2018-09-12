@@ -42,6 +42,14 @@ class Param {
     return (value && uuidValidate(value)) ? value : null;
   }
 
+  getArr(key) {
+    var value = this.get(key);
+    if (value !== null && !Array.isArray(value)) {
+      throw new Error('Array expected received incompatible value for: ' + key);
+    }
+    return value;
+  }
+
   exists(key) {
     return key in this._req.query ||
       key in this._req.body ||
