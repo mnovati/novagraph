@@ -4,8 +4,9 @@ const NovaError = require('./NovaError.js');
 async function parseSet(ng, DB, viewer, object, nodes) {
   var objects = {};
   var edges = [];
+  var edge_counts = [];
   if (!nodes || !nodes.selections) {
-    return [objects, edges];
+    return [objects, edges, edge_counts];
   }
   await Promise.all(nodes.selections.map(async node => {
     if (object) {
@@ -13,6 +14,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
       var count = null;
       var offset = null;
       var after = null;
+      var count_only = false;
       await Promise.all((node.arguments || []).map(async arg => {
         if (arg.name.value === 'to_id') {
           to_id = arg.value.value;
@@ -28,11 +30,15 @@ async function parseSet(ng, DB, viewer, object, nodes) {
           if (offset !== null) {
             offset = null;
           }
+        } else if (arg.name.value === 'count') {
+          count_only = true;
         }
       }));
       var ids_to_fetch = {};
       var edge_type = ng.CONSTANTS.getEdgeTypeFromName(object.getType(), node.name.value);
-      if (to_id) {
+      if (count_only) {
+        result = await DB.getEdge(viewer.getReadAllViewer(), object.getID(), edge_type);
+      } else if (to_id) {
         result = await DB.getSingleEdge(viewer, object.getID(), edge_type, to_id);
         result = [result];
       } else {
@@ -41,16 +47,27 @@ async function parseSet(ng, DB, viewer, object, nodes) {
       result = (result || []).filter(Boolean);
 
       // pagination
-      count = count === null ? result.length : count;
-      var add = after === null && offset === null;
-      for (var ii = 0; ii < result.length && count > 0; ii++) {
-        add = add || (offset !== null && offset === ii);
-        if (add) {
-          edges.push(result[ii]);
-          ids_to_fetch[result[ii].getToID()] = true;
-          count--;
+      if (count_only) {
+        edge_counts.push({
+          from_id: object.getID(),
+          type: edge_type,
+          count: result.length
+        });
+        if (node.selectionSet && node.selectionSet.selections && node.selectionSet.selections.length > 0) {
+          throw new Error('Cannot have selections in a count-only row');
         }
-        add = add || (after !== null && result[ii].getToID() === after);
+      } else {
+        count = count === null ? result.length : count;
+        var add = after === null && offset === null;
+        for (var ii = 0; ii < result.length && count > 0; ii++) {
+          add = add || (offset !== null && offset === ii);
+          if (add) {
+            edges.push(result[ii]);
+            ids_to_fetch[result[ii].getToID()] = true;
+            count--;
+          }
+          add = add || (after !== null && result[ii].getToID() === after);
+        }
       }
       await Promise.all(Object.keys(ids_to_fetch).map(async object_id => {
         var object = await DB.getObject(viewer, object_id);
@@ -149,12 +166,13 @@ async function parseSet(ng, DB, viewer, object, nodes) {
       if (!objects[object_id]) {
         return;
       }
-      var [more_objects, more_edges] = await parseSet(ng, DB, viewer, objects[object_id], node.selectionSet);
+      var [more_objects, more_edges, more_edge_counts] = await parseSet(ng, DB, viewer, objects[object_id], node.selectionSet);
       Object.keys(more_objects).map(i => objects[i] = more_objects[i]);
       more_edges.forEach(e => edges.push(e));
+      more_edge_counts.forEach(e => edge_counts.push(e));
     }));
   }));
-  return [objects, edges];
+  return [objects, edges, edge_counts];
 }
 
 class GraphQL {
