@@ -14,6 +14,8 @@ async function parseSet(ng, DB, viewer, object, nodes) {
       var count = null;
       var offset = null;
       var after = null;
+      var time_after = null;
+      var time_before = null;
       var count_only = false;
       await Promise.all((node.arguments || []).map(async arg => {
         if (arg.name.value === 'to_id') {
@@ -30,6 +32,10 @@ async function parseSet(ng, DB, viewer, object, nodes) {
           if (offset !== null) {
             offset = null;
           }
+        } else if (arg.name.value === 'time_before') {
+          time_before = new Date(arg.value.value).getTime();
+        } else if (arg.name.value === 'time_after') {
+          time_after = new Date(arg.value.value).getTime();
         } else if (arg.name.value === 'count') {
           count_only = true;
         }
@@ -48,10 +54,17 @@ async function parseSet(ng, DB, viewer, object, nodes) {
 
       // pagination
       if (count_only) {
+        var filtered_count = 0;
+        for (var ii = 0; ii < result.length && count > 0; ii++) {
+          if ((time_after === null || new Date(result[ii].edge.time_created).getTime() > time_after) &&
+              (time_before === null || new Date(result[ii].edge.time_created).getTime() < time_before)) {
+            filtered_count++;
+          }
+        }
         edge_counts.push({
           from_id: object.getID(),
           type: edge_type,
-          count: result.length
+          count: filtered_count
         });
         if (node.selectionSet && node.selectionSet.selections && node.selectionSet.selections.length > 0) {
           throw new Error('Cannot have selections in a count-only row');
@@ -62,9 +75,12 @@ async function parseSet(ng, DB, viewer, object, nodes) {
         for (var ii = 0; ii < result.length && count > 0; ii++) {
           add = add || (offset !== null && offset === ii);
           if (add) {
-            edges.push(result[ii]);
-            ids_to_fetch[result[ii].getToID()] = true;
-            count--;
+            if ((time_after === null || new Date(result[ii].edge.time_created).getTime() > time_after) &&
+                (time_before === null || new Date(result[ii].edge.time_created).getTime() < time_before)) {
+              edges.push(result[ii]);
+              ids_to_fetch[result[ii].getToID()] = true;
+              count--;
+            }
           }
           add = add || (after !== null && result[ii].getToID() === after);
         }
