@@ -55,7 +55,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
       // pagination
       if (count_only) {
         var filtered_count = 0;
-        for (var ii = 0; ii < result.length && count > 0; ii++) {
+        for (var ii = 0; ii < result.length; ii++) {
           if ((time_after === null || new Date(result[ii].edge.time_created).getTime() > time_after) &&
               (time_before === null || new Date(result[ii].edge.time_created).getTime() < time_before)) {
             filtered_count++;
