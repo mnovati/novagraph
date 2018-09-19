@@ -56,8 +56,8 @@ async function parseSet(ng, DB, viewer, object, nodes) {
       if (count_only) {
         var filtered_count = 0;
         for (var ii = 0; ii < result.length; ii++) {
-          if ((time_after === null || new Date(result[ii].edge.time_modified).getTime() > time_after) &&
-              (time_before === null || new Date(result[ii].edge.time_modified).getTime() < time_before)) {
+          if ((time_after === null || new Date(result[ii].edge.time_updated).getTime() > time_after) &&
+              (time_before === null || new Date(result[ii].edge.time_updated).getTime() < time_before)) {
             filtered_count++;
           }
         }
