@@ -10,79 +10,102 @@ async function parseSet(ng, DB, viewer, object, nodes) {
   }
   await Promise.all(nodes.selections.map(async node => {
     if (object) {
-      var to_id = null;
-      var count = null;
-      var offset = null;
-      var after = null;
-      var time_after = null;
-      var time_before = null;
-      var count_only = false;
-      await Promise.all((node.arguments || []).map(async arg => {
-        if (arg.name.value === 'to_id') {
-          to_id = arg.value.value;
-        } else if (arg.name.value === 'first') {
-          count = parseInt(arg.value.value);
-        } else if (arg.name.value === 'offset') {
-          offset = parseInt(arg.value.value);
-          if (after !== null) {
-            after = null;
-          }
-        } else if (arg.name.value === 'after') {
-          after = arg.value.value;
-          if (offset !== null) {
-            offset = null;
-          }
-        } else if (arg.name.value === 'time_before') {
-          time_before = new Date(arg.value.value).getTime();
-        } else if (arg.name.value === 'time_after') {
-          time_after = new Date(arg.value.value).getTime();
-        } else if (arg.name.value === 'count') {
-          count_only = true;
-        }
-      }));
-      var ids_to_fetch = {};
-      var edge_type = ng.CONSTANTS.getEdgeTypeFromName(object.getType(), node.name.value);
-      if (count_only) {
-        result = await DB.getEdge(viewer.getReadAllViewer(), object.getID(), edge_type);
-      } else if (to_id) {
-        result = await DB.getSingleEdge(viewer, object.getID(), edge_type, to_id);
-        result = [result];
-      } else {
-        result = await DB.getEdge(viewer, object.getID(), edge_type);
+      var edge_type = null;
+      try {
+        edge_type = ng.CONSTANTS.getEdgeTypeFromName(object.getType(), node.name.value);
+      } catch (e) {
+        edge_type = null;
       }
-      result = (result || []).filter(Boolean);
-
-      // pagination
-      if (count_only) {
-        var filtered_count = 0;
-        for (var ii = 0; ii < result.length; ii++) {
-          if ((time_after === null || new Date(result[ii].edge.time_updated).getTime() > time_after) &&
-              (time_before === null || new Date(result[ii].edge.time_updated).getTime() < time_before)) {
-            filtered_count++;
+      var ids_to_fetch = {};
+      if (edge_type !== null) {
+        var to_id = null;
+        var count = null;
+        var offset = null;
+        var after = null;
+        var time_after = null;
+        var time_before = null;
+        var count_only = false;
+        await Promise.all((node.arguments || []).map(async arg => {
+          if (arg.name.value === 'to_id') {
+            to_id = arg.value.value;
+          } else if (arg.name.value === 'first') {
+            count = parseInt(arg.value.value);
+          } else if (arg.name.value === 'offset') {
+            offset = parseInt(arg.value.value);
+            if (after !== null) {
+              after = null;
+            }
+          } else if (arg.name.value === 'after') {
+            after = arg.value.value;
+            if (offset !== null) {
+              offset = null;
+            }
+          } else if (arg.name.value === 'time_before') {
+            time_before = new Date(arg.value.value).getTime();
+          } else if (arg.name.value === 'time_after') {
+            time_after = new Date(arg.value.value).getTime();
+          } else if (arg.name.value === 'count') {
+            count_only = true;
           }
+        }));
+        if (count_only) {
+          result = await DB.getEdge(viewer.getReadAllViewer(), object.getID(), edge_type);
+        } else if (to_id) {
+          result = await DB.getSingleEdge(viewer, object.getID(), edge_type, to_id);
+          result = [result];
+        } else {
+          result = await DB.getEdge(viewer, object.getID(), edge_type);
         }
-        edge_counts.push({
-          from_id: object.getID(),
-          type: edge_type,
-          count: filtered_count
-        });
-        if (node.selectionSet && node.selectionSet.selections && node.selectionSet.selections.length > 0) {
-          throw new Error('Cannot have selections in a count-only row');
-        }
-      } else {
-        count = count === null ? result.length : count;
-        var add = after === null && offset === null;
-        for (var ii = 0; ii < result.length && count > 0; ii++) {
-          add = add || (offset !== null && offset === ii);
-          if (add) {
-            if ((time_after === null || new Date(result[ii].edge.time_created).getTime() > time_after) &&
-                (time_before === null || new Date(result[ii].edge.time_created).getTime() < time_before)) {
-              edges.push(result[ii]);
-              ids_to_fetch[result[ii].getToID()] = true;
-              count--;
+        result = (result || []).filter(Boolean);
+
+        // pagination
+        if (count_only) {
+          var filtered_count = 0;
+          for (var ii = 0; ii < result.length; ii++) {
+            if ((time_after === null || new Date(result[ii].edge.time_updated).getTime() > time_after) &&
+                (time_before === null || new Date(result[ii].edge.time_updated).getTime() < time_before)) {
+              filtered_count++;
             }
           }
-          add = add || (after !== null && result[ii].getToID() === after);
+          edge_counts.push({
+            from_id: object.getID(),
+            type: edge_type,
+            count: filtered_count
+          });
+          if (node.selectionSet && node.selectionSet.selections && node.selectionSet.selections.length > 0) {
+            throw new Error('Cannot have selections in a count-only row');
+          }
+        } else {
+          count = count === null ? result.length : count;
+          var add = after === null && offset === null;
+          for (var ii = 0; ii < result.length && count > 0; ii++) {
+            add = add || (offset !== null && offset === ii);
+            if (add) {
+              if ((time_after === null || new Date(result[ii].edge.time_created).getTime() > time_after) &&
+                  (time_before === null || new Date(result[ii].edge.time_created).getTime() < time_before)) {
+                edges.push(result[ii]);
+                ids_to_fetch[result[ii].getToID()] = true;
+                count--;
+              }
+            }
+            add = add || (after !== null && result[ii].getToID() === after);
+          }
+        }
+      } else {
+        var object_data = await object.getData();
+        if (node.name.value in object_data) {
+          var object_value = object_data[node.name.value];
+          if (Array.isArray(object_value)) {
+            object_value.forEach(id => {
+              if (typeof id === 'string' || id instanceof String) {
+                ids_to_fetch[id] = true;
+              }
+            });
+          } else if (typeof object_value === 'string' || object_value instanceof String) {
+            ids_to_fetch[object_value] = true;
+          } else {
+            NovaError.throwError('Field ' + node.name.value + ' must contain string or array');
+          }
         }
       }
       await Promise.all(Object.keys(ids_to_fetch).map(async object_id => {
