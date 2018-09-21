@@ -25,6 +25,8 @@ async function parseSet(ng, DB, viewer, object, nodes) {
         var time_after = null;
         var time_before = null;
         var count_only = false;
+        var order_field = null;
+        var order_dir = null;
         await Promise.all((node.arguments || []).map(async arg => {
           if (arg.name.value === 'to_id') {
             to_id = arg.value.value;
@@ -46,6 +48,12 @@ async function parseSet(ng, DB, viewer, object, nodes) {
             time_after = new Date(arg.value.value).getTime();
           } else if (arg.name.value === 'count') {
             count_only = true;
+          } else if (arg.name.value.endsWith('_DESC')) {
+            order_field = arg.name.value.slice(0, -5);
+            order_dir = 'DESC';
+          } else if (arg.name.value.endsWith('_ASC')) {
+            order_field = arg.name.value.slice(0, -4);
+            order_dir = 'ASC';
           }
         }));
         if (count_only) {
@@ -76,6 +84,11 @@ async function parseSet(ng, DB, viewer, object, nodes) {
             throw new Error('Cannot have selections in a count-only row');
           }
         } else {
+          if (order_field !== null && order_dir !== null) {
+            result.sort((a, b) => {
+              return ((a.edge[order_field] || 0) - (b.edge[order_field] || 0)) * (order_dir === 'DESC' ? -1 : 1);
+            });
+          }
           count = count === null ? result.length : count;
           var add = after === null && offset === null;
           for (var ii = 0; ii < result.length && count > 0; ii++) {
