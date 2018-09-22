@@ -48,12 +48,16 @@ async function parseSet(ng, DB, viewer, object, nodes) {
             time_after = new Date(arg.value.value).getTime();
           } else if (arg.name.value === 'count') {
             count_only = true;
-          } else if (arg.name.value.endsWith('_DESC')) {
-            order_field = arg.name.value.slice(0, -5);
-            order_dir = 'DESC';
-          } else if (arg.name.value.endsWith('_ASC')) {
-            order_field = arg.name.value.slice(0, -4);
-            order_dir = 'ASC';
+          } else if (arg.name.value === 'orderBy') {
+            if (arg.value.value.endsWith('_DESC')) {
+              order_field = arg.name.value.slice(0, -5);
+              order_dir = 'DESC';
+            } else if (arg.value.value.endsWith('_ASC')) {
+              order_field = arg.name.value.slice(0, -4);
+              order_dir = 'ASC';
+            } else {
+              NovaError.throwError('orderBy must end with _DESC or _ASC');
+            }
           }
         }));
         if (count_only) {
@@ -81,7 +85,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
             count: filtered_count
           });
           if (node.selectionSet && node.selectionSet.selections && node.selectionSet.selections.length > 0) {
-            throw new Error('Cannot have selections in a count-only row');
+            NovaError.throwError('Cannot have selections in a count-only row');
           }
         } else {
           if (order_field !== null && order_dir !== null) {
