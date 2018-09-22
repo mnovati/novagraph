@@ -50,10 +50,10 @@ async function parseSet(ng, DB, viewer, object, nodes) {
             count_only = true;
           } else if (arg.name.value === 'orderBy') {
             if (arg.value.value.endsWith('_DESC')) {
-              order_field = arg.name.value.slice(0, -5);
+              order_field = arg.value.value.slice(0, -5);
               order_dir = 'DESC';
             } else if (arg.value.value.endsWith('_ASC')) {
-              order_field = arg.name.value.slice(0, -4);
+              order_field = arg.value.value.slice(0, -4);
               order_dir = 'ASC';
             } else {
               NovaError.throwError('orderBy must end with _DESC or _ASC');
