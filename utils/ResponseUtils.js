@@ -81,6 +81,4 @@ class ResponseUtils {
 
 ResponseUtils._expand = [];
 
-module.exports = function (res, DB) {
-  return new ResponseUtils(res, DB);
-}
+module.exports = ResponseUtils;
