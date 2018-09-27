@@ -72,14 +72,22 @@ class ResponseUtils {
 		out.objects = raw_objects;
 		out.edges = raw_edges.filter(Boolean);
 		this._res.send(out);
+		for (var ii = 0; ii < ResponseUtils._cleanup.length; ii++) {
+			await ResponseUtils._cleanup[ii](this._DB);
+		}
 		this._res.end();
 	}
 
   static addExpansionCallback(fn) {
     ResponseUtils._expand.push(fn);
   }
+
+  static addCleanupCallback(fn) {
+    ResponseUtils._cleanup.push(fn);
+  }
 }
 
 ResponseUtils._expand = [];
+ResponseUtils._cleanup = [];
 
 module.exports = ResponseUtils;
