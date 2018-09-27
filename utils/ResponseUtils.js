@@ -1,3 +1,4 @@
+const Constants = require('../lib/constants.js');
 
 class ResponseUtils {
 
@@ -63,7 +64,7 @@ class ResponseUtils {
 				dedup[key] = true;
 				var object = await this._DB.getObject(read_all_viewer, edge.from_id);
 				edge = Object.assign({}, edge);
-				edge.type = (object ? object.getAPIType() : 'null') + '/' + NovaGraph.CONSTANTS.Edges[edge.type].api_name;
+				edge.type = (object ? object.getAPIType() : 'null') + '/' + Constants.Edges[edge.type].api_name;
 				return edge;
 			}));
 			out.edge_counts = out.edge_counts.filter(Boolean);
