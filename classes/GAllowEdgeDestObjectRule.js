@@ -1,0 +1,30 @@
+const GRule = require('./GRule.js');
+
+class GAllowEdgeDestObjectRule extends GRule {
+
+  constructor(edges) {
+    super();
+    this.edges = edges;
+  }
+
+  async can(object) {
+    if (object.getViewer().isLoggedOut()) {
+      return this.skip();
+    }
+    const DB = require('../lib/db.js');
+    if (!Array.isArray(this.edges)) {
+      throw new Error('Invalid edges provided to edge-based privacy rule');
+    }
+    var result = await Promise.all(this.edges.map(async (e) => {
+      var edges = await DB.getEdge(object.getViewer(), object.getID(), e);
+      var objects = await Promis.all(edges.map(async (ee) => {
+        var o = await DB.getObject(object.getViewer(), ee.getToID());
+        return !!o;
+      }));
+      return objects.filter(Boolean).length > 0;
+    }));
+    return result.filter(Boolean).length > 0 ? this.pass() : this.skip();
+  }
+}
+
+module.exports = GAllowEdgeDestObjectRule;
