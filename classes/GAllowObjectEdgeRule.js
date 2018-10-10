@@ -11,7 +11,7 @@ class GAllowObjectEdgeRule extends GRule {
   }
 
   async can(edge) {
-    const DB = require('../novagraph/lib/db.js');
+    const DB = require('../lib/db.js');
     var [dest, source] = await Promise.all([
       DB.getObject(edge.getViewer(), edge.getToID()),
       DB.getObject(edge.getViewer(), edge.getFromID()),
