@@ -8,6 +8,9 @@ class GAllowEdgeDestObjectRule extends GRule {
   }
 
   async can(object) {
+    if (object.getViewer().isReadAll()) {
+      return this.pass();
+    }
     if (object.getViewer().isLoggedOut()) {
       return this.skip();
     }
