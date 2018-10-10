@@ -4,6 +4,7 @@ const GRule = require('./GRule.js');
 class GAllowViewerEdgeEdgeRule extends GRule {
 
   constructor(type, edges) {
+    super();
     if (type !== 'source' && type !== 'dest') {
       throw new Error('Type must be source, dest, both, or either');
     }
