@@ -1,7 +1,7 @@
 const ReadAllViewer = require('./ReadAllViewer.js');
 const GRule = require('./GRule.js');
 
-class GAllowEdgeObjectRule extends GRule {
+class GAllowViewerEdgeObjectRule extends GRule {
 
   constructor(edges) {
     super();
@@ -24,4 +24,4 @@ class GAllowEdgeObjectRule extends GRule {
   }
 }
 
-module.exports = GAllowEdgeObjectRule;
+module.exports = GAllowViewerEdgeObjectRule;
