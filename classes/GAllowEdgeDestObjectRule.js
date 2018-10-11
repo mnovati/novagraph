@@ -1,3 +1,4 @@
+const ReadAllViewer = require('./ReadAllViewer.js');
 const GRule = require('./GRule.js');
 
 class GAllowEdgeDestObjectRule extends GRule {
@@ -8,9 +9,6 @@ class GAllowEdgeDestObjectRule extends GRule {
   }
 
   async can(object) {
-    if (object.getViewer().isReadAll()) {
-      return this.pass();
-    }
     if (object.getViewer().isLoggedOut()) {
       return this.skip();
     }
@@ -19,7 +17,7 @@ class GAllowEdgeDestObjectRule extends GRule {
       throw new Error('Invalid edges provided to edge-based privacy rule');
     }
     var result = await Promise.all(this.edges.map(async (e) => {
-      var edges = await DB.getEdge(object.getViewer(), object.getID(), e);
+      var edges = await DB.getEdge(new ReadAllViewer(0), object.getID(), e);
       var objects = await Promise.all(edges.map(async (ee) => {
         var o = await DB.getObject(object.getViewer(), ee.getToID());
         return !!o;
