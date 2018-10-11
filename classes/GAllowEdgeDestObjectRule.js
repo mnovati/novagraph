@@ -20,7 +20,7 @@ class GAllowEdgeDestObjectRule extends GRule {
     }
     var result = await Promise.all(this.edges.map(async (e) => {
       var edges = await DB.getEdge(object.getViewer(), object.getID(), e);
-      var objects = await Promis.all(edges.map(async (ee) => {
+      var objects = await Promise.all(edges.map(async (ee) => {
         var o = await DB.getObject(object.getViewer(), ee.getToID());
         return !!o;
       }));
