@@ -176,12 +176,17 @@ async function parseSet(ng, DB, viewer, object, nodes) {
         }
       }));
       if (missing) {
-        var config = ng.CONSTANTS.getObject(type);
-        if (!config.root_id) {
-          NovaError.throwError('Cannot fetch all objects for given type');
+        if (node.name.value === 'viewer') {
+          object_ids.push(viewer.getID());
+          type = 'profile';
+        } else {
+          var config = ng.CONSTANTS.getObject(type);
+          if (!config.root_id) {
+            NovaError.throwError('Cannot fetch all objects for given type');
+          }
+          var edge = await DB.getEdge(viewer, config.root_id, ng.CONSTANTS.ROOT_EDGE);
+          edge.forEach(e => object_ids.push(e.getToID()));
         }
-        var edge = await DB.getEdge(viewer, config.root_id, ng.CONSTANTS.ROOT_EDGE);
-        edge.forEach(e => object_ids.push(e.getToID()));
       }
 
       // find intersection of all indices used
