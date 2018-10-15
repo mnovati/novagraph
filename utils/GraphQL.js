@@ -178,7 +178,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
       if (missing) {
         if (node.name.value === 'viewer') {
           object_ids.push(viewer.getID());
-          type = 'profile';
+          type = 0;
         } else {
           var config = ng.CONSTANTS.getObject(type);
           if (!config.root_id) {
