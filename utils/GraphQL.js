@@ -114,13 +114,13 @@ async function parseSet(ng, DB, viewer, object, nodes) {
           var object_value = object_data[node.name.value];
           if (Array.isArray(object_value)) {
             object_value.forEach(id => {
-              if (typeof id === 'string' || id instanceof String) {
+              if ((typeof id === 'string' || id instanceof String) && id.length > 0) {
                 ids_to_fetch[id] = true;
               }
             });
-          } else if (typeof object_value === 'string' || object_value instanceof String) {
+          } else if ((typeof object_value === 'string' || object_value instanceof String) && ids_to_fetch.length > 0) {
             ids_to_fetch[object_value] = true;
-          } else {
+          } else if (object_value) {
             NovaError.throwError('Field ' + node.name.value + ' must contain string or array');
           }
         }
