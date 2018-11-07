@@ -30,6 +30,10 @@ class GObject {
     return Object.assign({}, this.object);
   }
 
+  async filterField(key) {
+    return true;
+  }
+
   // these are functions used internally that shouldn't be overwritten
 
   async canSee() {
