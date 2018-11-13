@@ -5,6 +5,7 @@ class Viewer {
     this.cache = {};
     this.pending = {};
     this.readAll = null;
+    this._queryCount = 0;
   }
 
   getID() {
@@ -49,6 +50,14 @@ class Viewer {
 
   deletePending(key) {
     delete this.pending[key];
+  }
+
+  _incrQueryCount() {
+    this.queryCount++;
+  }
+
+  _getQueryCount() {
+    return this._queryCount;
   }
 
   getReadAllViewer() {
