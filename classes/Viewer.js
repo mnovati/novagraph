@@ -53,7 +53,7 @@ class Viewer {
   }
 
   _incrQueryCount() {
-    this.queryCount++;
+    this._queryCount++;
   }
 
   _getQueryCount() {
