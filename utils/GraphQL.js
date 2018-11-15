@@ -118,10 +118,10 @@ async function parseSet(ng, DB, viewer, object, nodes) {
                 ids_to_fetch[id] = true;
               }
             });
-          } else if ((typeof object_value === 'string' || object_value instanceof String) && ids_to_fetch.length > 0) {
+          } else if ((typeof object_value === 'string' || object_value instanceof String) && object_value.length > 0) {
             ids_to_fetch[object_value] = true;
           } else if (object_value) {
-            NovaError.throwError('Field ' + node.name.value + ' must contain string or array');
+            NovaError.throwError('Field ' + node.name.value + ' must contain string or array, ' + (typeof object_value) + ' provided');
           }
         }
       }
