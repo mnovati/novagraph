@@ -245,58 +245,58 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
   await Promise.all(nodes.selections.map(async node => {
     if (object) {
       var ids_to_fetch = {};
-			var to_ids = [];
-			var from_ids = [];
-			var data = null;
-			await Promise.all((node.arguments || []).map(async arg => {
-				if (arg.name.value === 'to_id') {
-					to_ids.push(arg.value.value);
-				} else if (arg.name.value === 'to_ids') {
+      var to_ids = [];
+      var from_ids = [];
+      var data = null;
+      await Promise.all((node.arguments || []).map(async arg => {
+        if (arg.name.value === 'to_id') {
+          to_ids.push(arg.value.value);
+        } else if (arg.name.value === 'to_ids') {
           arg.value.values.forEach(id => to_ids.push(id.value));
-				} else if (arg.name.value === 'from_id') {
-					from_ids.push(arg.value.value);
-				} else if (arg.name.value === 'from_ids') {
+        } else if (arg.name.value === 'from_id') {
+          from_ids.push(arg.value.value);
+        } else if (arg.name.value === 'from_ids') {
           arg.value.values.forEach(id => from_ids.push(id.value));
-				} else if (arg.name.value === 'data') {
-					data = arg.value.value;
-				}
-			}));
-			if (data !== null && (to_ids.length > 0 || from_ids.length > 0)) {
-				NovaError.throwError('Cannot have both object data and to or from ids in edge mutation');
-			}
-			if (to_ids.length > 0 && from_ids.length > 0) {
-				NovaError.throwError('Can only have to or from ids but not both in edge mutation');
-			}
-			if (to_ids.length > 0) {
-				result = await Promise.all(to_ids.map(async to_id => {
-					var edge_type = ng.CONSTANTS.getEdgeTypeFromName(object.getType(), node.name.value);
-					await DB.createEdge(viewer, Constants.getEdgeInstance(viewer, {
-						from_id: object.getID(),
-						to_id: to_id,
-						type: edge_type,
-						data: data === null ? '' : data
-					}));
-					return await DB.getSingleEdge(viewer, object.getID(), edge_type, to_id);
-				}));
-			} else if (from_ids.length > 0) {
-				result = await Promise.all(from_ids.map(async from_id => {
-					var from_object = await DB.getObject(viewer, from_id);
-					var edge_type = ng.CONSTANTS.getEdgeTypeFromName(from_object.getType(), node.name.value);
-					await DB.createEdge(viewer, Constants.getEdgeInstance(viewer, {
-						from_id: from_id,
-						to_id: object.getID(),
-						type: edge_type,
-						data: data === null ? '' : data
-					}));
-					return await DB.getSingleEdge(viewer, from_id, edge_type, object.getID());
-				}));
-			}
-			result = (result || []).filter(Boolean);
+        } else if (arg.name.value === 'data') {
+          data = arg.value.value;
+        }
+      }));
+      if (data !== null && (to_ids.length > 0 || from_ids.length > 0)) {
+        NovaError.throwError('Cannot have both object data and to or from ids in edge mutation');
+      }
+      if (to_ids.length > 0 && from_ids.length > 0) {
+        NovaError.throwError('Can only have to or from ids but not both in edge mutation');
+      }
+      if (to_ids.length > 0) {
+        result = await Promise.all(to_ids.map(async to_id => {
+          var edge_type = ng.CONSTANTS.getEdgeTypeFromName(object.getType(), node.name.value);
+          await DB.createEdge(viewer, Constants.getEdgeInstance(viewer, {
+            from_id: object.getID(),
+            to_id: to_id,
+            type: edge_type,
+            data: data === null ? '' : data
+          }));
+          return await DB.getSingleEdge(viewer, object.getID(), edge_type, to_id);
+        }));
+      } else if (from_ids.length > 0) {
+        result = await Promise.all(from_ids.map(async from_id => {
+          var from_object = await DB.getObject(viewer, from_id);
+          var edge_type = ng.CONSTANTS.getEdgeTypeFromName(from_object.getType(), node.name.value);
+          await DB.createEdge(viewer, Constants.getEdgeInstance(viewer, {
+            from_id: from_id,
+            to_id: object.getID(),
+            type: edge_type,
+            data: data === null ? '' : data
+          }));
+          return await DB.getSingleEdge(viewer, from_id, edge_type, object.getID());
+        }));
+      }
+      result = (result || []).filter(Boolean);
 
-			for (var ii = 0; ii < result.length; ii++) {
-				edges.push(result[ii]);
-				ids_to_fetch[result[ii].getToID()] = true;
-			}
+      for (var ii = 0; ii < result.length; ii++) {
+        edges.push(result[ii]);
+        ids_to_fetch[result[ii].getToID()] = true;
+      }
       await Promise.all(Object.keys(ids_to_fetch).map(async object_id => {
         var object = await DB.getObject(viewer, object_id);
         objects[object_id] = object;
@@ -315,7 +315,6 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           missing = false;
         } else if (arg.name.value === 'data') {
           data = JSON.parse(arg.value.values);
-          missing = false;
         }
       }));
       if (missing) {
@@ -331,20 +330,20 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           object_ids.push(id);
         } else {
           await Promise.all(object_ids.map(async object_id => {
-						var old_object = await DB.getObject(viewer, object_id);
-						if (old_object && (old_object.getType() !== type)) {
-						  NovaError.throwError('Object type does not match requested type');
-						}
-						var old_data = await old_object.getData();
-						data.creator_id = old_data.creator_id;
-						var result = await DB.modifyObject(viewer, Constants.getObjectInstance(viewer, {
-						  id: object_id,
-						  type: type,
-						  data: data
-						}));
-						if (!result) {
-						  NovaError.throwError('Failed to update object: ' + object_id);
-						}
+            var old_object = await DB.getObject(viewer, object_id);
+            if (old_object && (old_object.getType() !== type)) {
+              NovaError.throwError('Object type does not match requested type');
+            }
+            var old_data = await old_object.getData();
+            data.creator_id = old_data.creator_id;
+            var result = await DB.modifyObject(viewer, Constants.getObjectInstance(viewer, {
+              id: object_id,
+              type: type,
+              data: data
+            }));
+            if (!result) {
+              NovaError.throwError('Failed to update object: ' + object_id);
+            }
           }));
         }
       }
@@ -355,7 +354,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           NovaError.throwError('Object type does not match requested type');
         }
         if (object) {
-					objects[object.getID()] = object;
+          objects[object.getID()] = object;
         }
       }));
     }
