@@ -270,6 +270,9 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
       if (to_ids.length > 0) {
         result = await Promise.all(to_ids.map(async to_id => {
           var edge_type = ng.CONSTANTS.getEdgeTypeFromName(object.getType(), node.name.value);
+          if (edge_type === null) {
+            NovaError.throwError('Invalid edge type :' + node.name.value);
+          }
           await DB.createEdge(viewer, Constants.getEdgeInstance(viewer, {
             from_id: object.getID(),
             to_id: to_id,
@@ -282,6 +285,9 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
         result = await Promise.all(from_ids.map(async from_id => {
           var from_object = await DB.getObject(viewer, from_id);
           var edge_type = ng.CONSTANTS.getEdgeTypeFromName(from_object.getType(), node.name.value);
+          if (edge_type === null) {
+            NovaError.throwError('Invalid edge type :' + node.name.value);
+          }
           await DB.createEdge(viewer, Constants.getEdgeInstance(viewer, {
             from_id: from_id,
             to_id: object.getID(),
