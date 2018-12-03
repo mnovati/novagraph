@@ -314,7 +314,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           arg.value.values.forEach(id => object_ids.push(id.value));
           missing = false;
         } else if (arg.name.value === 'data') {
-          data = JSON.parse(arg.value.values);
+          data = JSON.parse(arg.value.value);
         }
       }));
       if (missing) {
@@ -326,7 +326,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
       if (data !== null) {
         if (object_ids.length === 0) {
           data.creator_id = viewer.getID();
-          var id = DB.createObject(viewer, type, data);
+          var id = await DB.createObject(viewer, type, data);
           object_ids.push(id);
         } else {
           await Promise.all(object_ids.map(async object_id => {
