@@ -82,7 +82,7 @@ CREATE TABLE `indices` (
 
 DROP TABLE IF EXISTS `geoindices`;
 CREATE TABLE `geoindices` (
-  `id` binary(26) NOT NULL,
+  `id` binary(16) NOT NULL,
   `type` smallint(5) unsigned DEFAULT NULL,
   `shape` geometry NOT NULL,
   PRIMARY KEY (`id`),
@@ -95,7 +95,7 @@ CREATE TABLE `geoindices` (
 
 DROP TABLE IF EXISTS `ftsindices`;
 CREATE TABLE `ftsindices` (
-  `id` binary(26) NOT NULL,
+  `id` binary(16) NOT NULL,
   `type` smallint(5) unsigned NOT NULL,
   `data` text NOT NULL,
   PRIMARY KEY (`id`, `type`),
@@ -110,7 +110,7 @@ CREATE TABLE `ftsindices` (
 
 DROP TABLE IF EXISTS `deferindices`;
 CREATE TABLE `deferindices` (
-  `id` binary(26) NOT NULL,
+  `id` binary(16) NOT NULL,
   `type` smallint(5) unsigned NOT NULL,
   `defer_time` timestamp NOT NULL,
   PRIMARY KEY (`id`),
