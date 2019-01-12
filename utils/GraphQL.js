@@ -246,6 +246,25 @@ async function parseSet(ng, DB, viewer, object, nodes) {
   return [objects, edges, edge_counts];
 }
 
+async function createOrUpdateEdge(ng, DB, viewer, from_id, type, to_id, data) {
+  var existing = await DB.getSingleEdge(viewer, from_id, type, to_id);
+  if (existing) {
+    if (data !== null && data != existing.getData()) {
+      var raw_edge = await existing.getRaw();
+      raw_edge.data = data;
+      await DB.modifyEdgeData(viewer, ng.CONSTANTS.getEdgeInstance(viewer, raw_edge));
+    }
+  } else {
+    await DB.createEdge(viewer, ng.CONSTANTS.getEdgeInstance(viewer, {
+      from_id: from_id,
+      to_id: to_id,
+      type: type,
+      data: data === null ? '' : data
+    }));
+  }
+  return await DB.getSingleEdge(viewer, from_id, type, to_id);
+}
+
 async function parseMutationSet(ng, DB, viewer, object, nodes) {
   var objects = {};
   var edges = [];
@@ -283,14 +302,11 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           if (edge_type === null) {
             NovaError.throwError('Invalid edge type :' + node.name.value);
           }
-          await DB.createEdge(viewer, ng.CONSTANTS.getEdgeInstance(viewer, {
-            from_id: object.getID(),
-            to_id: to_id,
-            type: edge_type,
-            data: data === null ? '' : data
-          }));
-          return await DB.getSingleEdge(viewer, object.getID(), edge_type, to_id);
+          return await createOrUpdateEdge(ng, DB, viewer, object.getID(), edge_type, to_id, data);
         }));
+        var all_edges = await DB.getEdge(viewer, object.getID(), edge_type);
+        all_edges = (all_edges || []).filter((edge) => !to_ids.includes(edge.getToID()));
+        await Promise.all(all_edges.map(async (edge) => await DB.deleteEdge(viewer, edge)));
       } else if (from_ids.length > 0) {
         result = await Promise.all(from_ids.map(async from_id => {
           var from_object = await DB.getObject(viewer, from_id);
@@ -298,13 +314,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           if (edge_type === null) {
             NovaError.throwError('Invalid edge type :' + node.name.value);
           }
-          await DB.createEdge(viewer, ng.CONSTANTS.getEdgeInstance(viewer, {
-            from_id: from_id,
-            to_id: object.getID(),
-            type: edge_type,
-            data: data === null ? '' : data
-          }));
-          return await DB.getSingleEdge(viewer, from_id, edge_type, object.getID());
+          return await createOrUpdateEdge(ng, DB, viewer, from_id, edge_type, object.getID(), data);
         }));
       }
       result = (result || []).filter(Boolean);
