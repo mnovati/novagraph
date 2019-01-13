@@ -297,8 +297,9 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
         NovaError.throwError('Can only have to or from ids but not both in edge mutation');
       }
       if (to_ids.length > 0) {
+        var edge_type;
         result = await Promise.all(to_ids.map(async to_id => {
-          var edge_type = ng.CONSTANTS.getEdgeTypeFromName(object.getType(), node.name.value);
+          edge_type = ng.CONSTANTS.getEdgeTypeFromName(object.getType(), node.name.value);
           if (edge_type === null) {
             NovaError.throwError('Invalid edge type :' + node.name.value);
           }
