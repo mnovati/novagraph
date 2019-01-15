@@ -276,6 +276,8 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
       var ids_to_fetch = {};
       var to_ids = [];
       var from_ids = [];
+      var delete_to_ids = [];
+      var delete_from_ids = [];
       var data = null;
       await Promise.all((node.arguments || []).map(async arg => {
         if (arg.name.value === 'to_id') {
@@ -286,6 +288,14 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           from_ids.push(arg.value.value);
         } else if (arg.name.value === 'from_ids') {
           arg.value.values.forEach(id => from_ids.push(id.value));
+        } else if (arg.name.value === 'delete_to_id') {
+          delete_to_ids.push(arg.value.value);
+        } else if (arg.name.value === 'delete_to_ids') {
+          arg.value.values.forEach(id => delete_to_ids.push(id.value));
+        } else if (arg.name.value === 'delete_from_id') {
+          delete_from_ids.push(arg.value.value);
+        } else if (arg.name.value === 'delete_from_ids') {
+          arg.value.values.forEach(id => delete_from_ids.push(id.value));
         } else if (arg.name.value === 'data') {
           data = arg.value.value;
         }
@@ -295,6 +305,12 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
       }
       if (to_ids.length > 0 && from_ids.length > 0) {
         NovaError.throwError('Can only have to or from ids but not both in edge mutation');
+      }
+      if (delete_to_ids.length > 0 && delete_from_ids.length > 0) {
+        NovaError.throwError('Can only delete to or from ids but not both in edge mutation');
+      }
+      if ((to_ids.length > 0 && delete_from_ids.length > 0) || (delete_to_ids.length > 0 && from_ids.length > 0)) {
+        NovaError.throwError('Cannot add and delete some to edges and some from edges at the same time');
       }
       if (to_ids.length > 0) {
         var edge_type = ng.CONSTANTS.getEdgeTypeFromName(object.getType(), node.name.value);
@@ -315,6 +331,34 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
             NovaError.throwError('Invalid edge type :' + node.name.value);
           }
           return await createOrUpdateEdge(ng, DB, viewer, from_id, edge_type, object.getID(), data);
+        }));
+      }
+      if (delete_to_ids.length > 0) {
+        var edge_type = ng.CONSTANTS.getEdgeTypeFromName(object.getType(), node.name.value);
+        if (edge_type === null) {
+          NovaError.throwError('Invalid edge type :' + node.name.value);
+        }
+        result = await Promise.all(to_ids.map(async to_id => {
+          return await DB.deleteEdge(viewer, ng.CONSTANTS.getEdgeInstance(viewer, {
+            from_id: object.getID(),
+            to_id: to_id,
+            type: edge_type,
+            data: data === null ? '' : data
+          }));
+        }));
+      } else if (delete_from_ids.length > 0) {
+        result = await Promise.all(from_ids.map(async from_id => {
+          var from_object = await DB.getObject(viewer, from_id);
+          var edge_type = ng.CONSTANTS.getEdgeTypeFromName(from_object.getType(), node.name.value);
+          if (edge_type === null) {
+            NovaError.throwError('Invalid edge type :' + node.name.value);
+          }
+          return await DB.deleteEdge(viewer, ng.CONSTANTS.getEdgeInstance(viewer, {
+            from_id: from_id,
+            to_id: object.getID(),
+            type: edge_type,
+            data: data === null ? '' : data
+          }));
         }));
       }
       result = (result || []).filter(Boolean);
