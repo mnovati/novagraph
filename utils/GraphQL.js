@@ -312,6 +312,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
       if ((to_ids.length > 0 && delete_from_ids.length > 0) || (delete_to_ids.length > 0 && from_ids.length > 0)) {
         NovaError.throwError('Cannot add and delete some to edges and some from edges at the same time');
       }
+      var result;
       if (to_ids.length > 0) {
         var edge_type = ng.CONSTANTS.getEdgeTypeFromName(object.getType(), node.name.value);
         if (edge_type === null) {
