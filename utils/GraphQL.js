@@ -27,6 +27,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
         var count_only = false;
         var order_field = null;
         var order_dir = null;
+        var intersect_id = null;
         await Promise.all((node.arguments || []).map(async arg => {
           if (arg.name.value === 'to_id') {
             to_id = arg.value.value;
@@ -48,6 +49,8 @@ async function parseSet(ng, DB, viewer, object, nodes) {
             time_after = new Date(arg.value.value).getTime();
           } else if (arg.name.value === 'count') {
             count_only = true;
+          } else if (arg.name.value === 'intersect_to_id') {
+            intersect_id = arg.value.value;
           } else if (arg.name.value === 'orderBy') {
             if (arg.value.value.endsWith('_DESC')) {
               order_field = arg.value.value.slice(0, -5);
@@ -60,15 +63,27 @@ async function parseSet(ng, DB, viewer, object, nodes) {
             }
           }
         }));
+        var intersect_result = null;
         if (count_only) {
           result = await DB.getEdge(viewer.getReadAllViewer(), object.getID(), edge_type);
+          if (intersect_id !== null) {
+            intersect_result = await DB.getEdge(viewer.getReadAllViewer(), intersect_id, edge_type);
+          }
         } else if (to_id) {
           result = await DB.getSingleEdge(viewer, object.getID(), edge_type, to_id);
           result = [result];
         } else {
           result = await DB.getEdge(viewer, object.getID(), edge_type);
+          if (intersect_id !== null) {
+            intersect_result = await DB.getEdge(viewer.getReadAllViewer(), intersect_id, edge_type);
+          }
         }
         result = (result || []).filter(Boolean);
+        if (intersect_result !== null) {
+          var intersect_map = {};
+          intersect_result = intersect_result.forEach(e => { intersect_map[e.getToID()] = true; });
+          result = result.filter(e => (e.getToID() in intersect_map));
+        }
 
         // pagination
         if (count_only) {
