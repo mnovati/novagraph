@@ -25,6 +25,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
         var time_after = null;
         var time_before = null;
         var count_only = false;
+        var no_objects = false;
         var order_field = null;
         var order_dir = null;
         var intersect_id = null;
@@ -49,6 +50,8 @@ async function parseSet(ng, DB, viewer, object, nodes) {
             time_after = new Date(arg.value.value).getTime();
           } else if (arg.name.value === 'count') {
             count_only = true;
+          } else if (arg.name.value === 'noobjects') {
+            no_objects = true;
           } else if (arg.name.value === 'intersect_to_id') {
             intersect_id = arg.value.value;
           } else if (arg.name.value === 'orderBy') {
@@ -122,6 +125,9 @@ async function parseSet(ng, DB, viewer, object, nodes) {
             }
             add = add || (after !== null && result[ii].getToID() === after);
           }
+        }
+        if (no_objects) {
+          ids_to_fetch = {};
         }
       } else {
         var object_data = await object.getData();
