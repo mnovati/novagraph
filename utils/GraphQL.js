@@ -295,6 +295,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
   await Promise.all(nodes.selections.map(async node => {
     if (object) {
       var ids_to_fetch = {};
+      var single_to_id = false;
       var to_ids = [];
       var from_ids = [];
       var delete_to_ids = [];
@@ -303,6 +304,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
       await Promise.all((node.arguments || []).map(async arg => {
         if (arg.name.value === 'to_id') {
           to_ids.push(arg.value.value);
+          single_to_id = true;
         } else if (arg.name.value === 'to_ids') {
           arg.value.values.forEach(id => to_ids.push(id.value));
         } else if (arg.name.value === 'from_id') {
@@ -342,9 +344,11 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
         result = await Promise.all(to_ids.map(async to_id => {
           return await createOrUpdateEdge(ng, DB, viewer, object.getID(), edge_type, to_id, data);
         }));
-        var all_edges = await DB.getEdge(viewer, object.getID(), edge_type);
-        all_edges = (all_edges || []).filter((edge) => !to_ids.includes(edge.getToID()));
-        await Promise.all(all_edges.map(async (edge) => await DB.deleteEdge(viewer, edge)));
+        if (!single_to_id) {
+          var all_edges = await DB.getEdge(viewer, object.getID(), edge_type);
+          all_edges = (all_edges || []).filter((edge) => !to_ids.includes(edge.getToID()));
+          await Promise.all(all_edges.map(async (edge) => await DB.deleteEdge(viewer, edge)));
+        }
       } else if (from_ids.length > 0) {
         result = await Promise.all(from_ids.map(async from_id => {
           var from_object = await DB.getObject(viewer, from_id);
