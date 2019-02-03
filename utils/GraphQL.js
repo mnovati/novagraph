@@ -323,9 +323,6 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           data = arg.value.value;
         }
       }));
-      if (data !== null && (to_ids.length > 0 || from_ids.length > 0)) {
-        NovaError.throwError('Cannot have both object data and to or from ids in edge mutation');
-      }
       if (to_ids.length > 0 && from_ids.length > 0) {
         NovaError.throwError('Can only have to or from ids but not both in edge mutation');
       }
