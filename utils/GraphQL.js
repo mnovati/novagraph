@@ -296,6 +296,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
     if (object) {
       var ids_to_fetch = {};
       var single_to_id = false;
+      var has_to_ids = false;
       var to_ids = [];
       var from_ids = [];
       var delete_to_ids = [];
@@ -307,6 +308,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           single_to_id = true;
         } else if (arg.name.value === 'to_ids') {
           arg.value.values.forEach(id => to_ids.push(id.value));
+          has_to_ids = true;
         } else if (arg.name.value === 'from_id') {
           from_ids.push(arg.value.value);
         } else if (arg.name.value === 'from_ids') {
@@ -323,17 +325,17 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           data = arg.value.value;
         }
       }));
-      if (to_ids.length > 0 && from_ids.length > 0) {
+      if ((to_ids.length > 0 || has_to_ids) && from_ids.length > 0) {
         NovaError.throwError('Can only have to or from ids but not both in edge mutation');
       }
       if (delete_to_ids.length > 0 && delete_from_ids.length > 0) {
         NovaError.throwError('Can only delete to or from ids but not both in edge mutation');
       }
-      if ((to_ids.length > 0 && delete_from_ids.length > 0) || (delete_to_ids.length > 0 && from_ids.length > 0)) {
+      if (((to_ids.length > 0 || has_to_ids) && delete_from_ids.length > 0) || (delete_to_ids.length > 0 && from_ids.length > 0)) {
         NovaError.throwError('Cannot add and delete some to edges and some from edges at the same time');
       }
       var result;
-      if (to_ids.length > 0) {
+      if (to_ids.length > 0 || has_to_ids) {
         var edge_type = ng.CONSTANTS.getEdgeTypeFromName(object.getType(), node.name.value);
         if (edge_type === null) {
           NovaError.throwError('Invalid edge type :' + node.name.value);
