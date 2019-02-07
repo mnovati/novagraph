@@ -4,10 +4,6 @@ class NovaError {
     this._handler = f;
   }
 
-  static throwError(error_msg) {
-    throw new Error(error_msg);
-  }
-
   static log(req, error) {
     var bundle = {
       request_url: req.method + ':' + req.path,

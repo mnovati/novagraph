@@ -1,6 +1,7 @@
 const Constants = require('../lib/constants.js');
 const WriteAllViewer = require('../classes/WriteAllViewer.js');
-const NovaError = require('./NovaError.js');
+const NError = require('../lib/error.js');
+const NovaError = require('../utils/NovaError.js');
 
 class DBUtils {
 
@@ -17,7 +18,7 @@ class DBUtils {
     } else {
       var old_object = await this._DB.getObject(viewer, object_id);
       if (old_object && (old_object.getType() !== type)) {
-        NovaError.throwError('Object type does not match requested type');
+        throw NError.normal('Object type does not match requested type');
       }
       var old_data = await old_object.getData();
       data['creator_id'] = old_data.creator_id;
@@ -27,7 +28,7 @@ class DBUtils {
         data: data
       }));
       if (!result) {
-        NovaError.throwError('Failed to update object: ' + object_id);
+        throw NError.normal('Failed to update object', { id: object_id });
       }
     }
 
@@ -101,7 +102,7 @@ class DBUtils {
       try {
         var result = await this._DB.createEdge(viewer, edge);
         if (!result) {
-          NovaError.throwError('Unknown error occurred creating edge');
+          throw NError.normal('Unknown error occurred creating edge');
         }
         out_edges.push(edge);
       } catch (e) {
@@ -126,14 +127,14 @@ class DBUtils {
 
   async createOrModifyEdge(viewer, from_id, from_type, to_id, edge_type, data) {
     if (!from_id) {
-      NovaError.throwError('Missing source id for edge modification');
+      throw NError.normal('Missing source id for edge modification');
     }
     var object = await this._DB.getObject(viewer, from_id);
     if (object.getType() !== from_type) {
-      NovaError.throwError('Object type does not match requested type');
+      throw NError.normal('Object type does not match requested type');
     }
     if (!to_id) {
-      NovaError.throwError('Missing destination id for edge modification');
+      throw NError.normal('Missing destination id for edge modification');
     }
     var existing = await this._DB.getSingleEdge(viewer, from_id, edge_type, to_id);
     if (existing) {
@@ -154,14 +155,14 @@ class DBUtils {
   async deleteObjectAndEdges(viewer, id, type) {
     var object = await this._DB.getObject(viewer, id);
     if (!object) {
-      NovaError.throwError('Error loading object to delete with id: ' + id);
+      throw NError.normal('Error loading object to delete', { id: id });
     }
     if (object.getType() !== type) {
-      NovaError.throwError('Object type does not match requested type');
+      throw NError.normal('Object type does not match requested type');
     }
     var result = await this._DB.setObjectStatus(viewer, object, Constants.Status.DELETED);
     if (!result) {
-      NovaError.throwError('Error deleting object');
+      throw NError.normal('Error deleting object');
     }
     await this._DB.quickChangeStatusAllEdges(
       new WriteAllViewer(0),
@@ -174,18 +175,18 @@ class DBUtils {
 
   async deleteSingleEdge(viewer, from_id, from_type, to_id, edge_type) {
     if (!from_id) {
-      NovaError.throwError('Missing source id for edge deletion');
+      throw NError.normal('Missing source id for edge deletion');
     }
     if (!to_id) {
-      NovaError.throwError('Missing destination id for edge modification');
+      throw NError.normal('Missing destination id for edge modification');
     }
     var object = await this._DB.getObject(viewer, from_id);
     if (object.getType() !== from_type) {
-      NovaError.throwError('Object type does not match requested type');
+      throw NError.normal('Object type does not match requested type');
     }
     var existing = await this._DB.getSingleEdge(viewer, from_id, edge_type, to_id);
     if (!existing) {
-      NovaError.throwError('Cannot cannot be loaded or may not exists');
+      throw NError.normal('Cannot cannot be loaded or may not exists');
     }
     await this._DB.deleteEdge(viewer, existing);
   }

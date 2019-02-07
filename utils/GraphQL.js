@@ -1,5 +1,5 @@
 const graphql = require('graphql/language');
-const NovaError = require('./NovaError.js');
+const NError = require('../lib/error.js');
 
 async function parseSet(ng, DB, viewer, object, nodes) {
   var objects = {};
@@ -62,7 +62,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
               order_field = arg.value.value.slice(0, -4);
               order_dir = 'ASC';
             } else {
-              NovaError.throwError('orderBy must end with _DESC or _ASC');
+              throw NError.normal('orderBy must end with _DESC or _ASC');
             }
           }
         }));
@@ -103,7 +103,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
             count: filtered_count
           });
           if (node.selectionSet && node.selectionSet.selections && node.selectionSet.selections.length > 0) {
-            NovaError.throwError('Cannot have selections in a count-only row');
+            throw NError.normal('Cannot have selections in a count-only row');
           }
         } else {
           if (order_field !== null && order_dir !== null) {
@@ -152,7 +152,10 @@ async function parseSet(ng, DB, viewer, object, nodes) {
               ids_to_fetch[id] = true;
             }
           } else if (object_value) {
-            NovaError.throwError('Field ' + node.name.value + ' must contain string or array, ' + (typeof object_value) + ' provided');
+            throw NError.normal('Field must contain string or array', {
+              field: node.name.value,
+              provided: (typeof object_value),
+            });
           }
         }
       }
@@ -213,7 +216,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
         } else {
           var config = ng.CONSTANTS.getObject(type);
           if (!config.root_id) {
-            NovaError.throwError('Cannot fetch all objects for given type');
+            throw NError.normal('Cannot fetch all objects for given type');
           }
           var edge = await DB.getEdge(viewer, config.root_id, ng.CONSTANTS.ROOT_EDGE);
           edge.forEach(e => object_ids.push(e.getToID()));
@@ -235,7 +238,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
       await Promise.all(object_ids.map(async object_id => {
         var object = await DB.getObject(viewer, object_id);
         if (object && (object.getType() !== type)) {
-          NovaError.throwError('Object type does not match requested type');
+          throw NError.normal('Object type does not match requested type');
         }
         if (object) {
           fetched.push(object);
@@ -326,19 +329,19 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
         }
       }));
       if ((to_ids.length > 0 || has_to_ids) && from_ids.length > 0) {
-        NovaError.throwError('Can only have to or from ids but not both in edge mutation');
+        throw NError.normal('Can only have to or from ids but not both in edge mutation');
       }
       if (delete_to_ids.length > 0 && delete_from_ids.length > 0) {
-        NovaError.throwError('Can only delete to or from ids but not both in edge mutation');
+        throw NError.normal('Can only delete to or from ids but not both in edge mutation');
       }
       if (((to_ids.length > 0 || has_to_ids) && delete_from_ids.length > 0) || (delete_to_ids.length > 0 && from_ids.length > 0)) {
-        NovaError.throwError('Cannot add and delete some to edges and some from edges at the same time');
+        throw NError.normal('Cannot add and delete some to edges and some from edges at the same time');
       }
       var result;
       if (to_ids.length > 0 || has_to_ids) {
         var edge_type = ng.CONSTANTS.getEdgeTypeFromName(object.getType(), node.name.value);
         if (edge_type === null) {
-          NovaError.throwError('Invalid edge type :' + node.name.value);
+          throw NError.normal('Invalid edge type', { type: node.name.value });
         }
         result = await Promise.all(to_ids.map(async to_id => {
           return await createOrUpdateEdge(ng, DB, viewer, object.getID(), edge_type, to_id, data);
@@ -353,7 +356,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           var from_object = await DB.getObject(viewer, from_id);
           var edge_type = ng.CONSTANTS.getEdgeTypeFromName(from_object.getType(), node.name.value);
           if (edge_type === null) {
-            NovaError.throwError('Invalid edge type :' + node.name.value);
+            throw NError.normal('Invalid edge type', { type: node.name.value });
           }
           return await createOrUpdateEdge(ng, DB, viewer, from_id, edge_type, object.getID(), data);
         }));
@@ -361,7 +364,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
       if (delete_to_ids.length > 0) {
         var edge_type = ng.CONSTANTS.getEdgeTypeFromName(object.getType(), node.name.value);
         if (edge_type === null) {
-          NovaError.throwError('Invalid edge type :' + node.name.value);
+          throw NError.normal('Invalid edge type', { type: node.name.value });
         }
         result = await Promise.all(to_ids.map(async to_id => {
           return await DB.deleteEdge(viewer, ng.CONSTANTS.getEdgeInstance(viewer, {
@@ -376,7 +379,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           var from_object = await DB.getObject(viewer, from_id);
           var edge_type = ng.CONSTANTS.getEdgeTypeFromName(from_object.getType(), node.name.value);
           if (edge_type === null) {
-            NovaError.throwError('Invalid edge type :' + node.name.value);
+            throw NError.normal('Invalid edge type', { type: node.name.value });
           }
           return await DB.deleteEdge(viewer, ng.CONSTANTS.getEdgeInstance(viewer, {
             from_id: from_id,
@@ -427,7 +430,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           await Promise.all(object_ids.map(async object_id => {
             var old_object = await DB.getObject(viewer, object_id);
             if (old_object && (old_object.getType() !== type)) {
-              NovaError.throwError('Object type does not match requested type');
+              throw NError.normal('Object type does not match requested type');
             }
             var old_data = await old_object.getData();
             data.creator_id = old_data.creator_id;
@@ -437,7 +440,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
               data: data
             }));
             if (!result) {
-              NovaError.throwError('Failed to update object: ' + object_id);
+              throw NError.normal('Failed to update object', { id: object_id });
             }
           }));
         }
@@ -446,7 +449,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
       await Promise.all(object_ids.map(async object_id => {
         var object = await DB.getObject(viewer, object_id);
         if (object && (object.getType() !== type)) {
-          NovaError.throwError('Object type does not match requested type');
+          throw NError.normal('Object type does not match requested type');
         }
         if (object) {
           objects[object.getID()] = object;

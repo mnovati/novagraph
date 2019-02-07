@@ -1,5 +1,7 @@
 const uuidValidate = require('uuid-validate');
 
+const NError = require('../lib/error.js');
+
 class Param {
 
   constructor(req) {
@@ -45,7 +47,7 @@ class Param {
   getArr(key) {
     var value = this.get(key);
     if (value !== null && !Array.isArray(value)) {
-      throw new Error('Array expected received incompatible value for: ' + key);
+      throw NError.normal('Array expected received incompatible value', { key: key });
     }
     return value;
   }

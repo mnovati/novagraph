@@ -1,12 +1,13 @@
 const ReadAllViewer = require('./ReadAllViewer.js');
 const GRule = require('./GRule.js');
+const NError = require('../lib/error.js');
 
 class GAllowViewerEdgeEdgeRule extends GRule {
 
   constructor(type, edges) {
     super();
     if (type !== 'source' && type !== 'dest') {
-      throw new Error('Type must be source, dest, both, or either');
+      throw NError.normal('Type must be source, dest, both, or either');
     }
     this.type = type;
     this.edges = edges;
@@ -18,7 +19,7 @@ class GAllowViewerEdgeEdgeRule extends GRule {
     }
     const DB = require('../lib/db.js');
     if (!Array.isArray(this.edges)) {
-      throw new Error('Invalid edges provided to edge-based privacy rule');
+      throw NError.normal('Invalid edges provided to edge-based privacy rule');
     }
     var result = await Promise.all(this.edges.map(async (e) => {
       var exists = await DB.getSingleEdge(
