@@ -10,7 +10,7 @@ class NovaError {
       request_time: new Date().toUTCString(),
       viewer_id: req.viewer ? req.viewer.getID() : 0,
       level: error.level,
-      error: error
+      error: error,
       context: error.context,
     };
     console.error(bundle);
