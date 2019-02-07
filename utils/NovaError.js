@@ -9,7 +9,9 @@ class NovaError {
       request_url: req.method + ':' + req.path,
       request_time: new Date().toUTCString(),
       viewer_id: req.viewer ? req.viewer.getID() : 0,
+      level: error.level,
       error: error
+      context: error.context,
     };
     console.error(bundle);
     if (this._handler) {
