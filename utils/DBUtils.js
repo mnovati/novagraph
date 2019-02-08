@@ -17,6 +17,9 @@ class DBUtils {
       created_new = true;
     } else {
       var old_object = await this._DB.getObject(viewer, object_id);
+      if (!old_object) {
+        throw NError.normal('Object ID provided but object cannot be loaded');
+      }
       if (old_object && (old_object.getType() !== type)) {
         throw NError.normal('Object type does not match requested type');
       }
