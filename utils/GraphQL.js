@@ -164,7 +164,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
         objects[object_id] = object;
       }));
     } else {
-      var type = ng.CONSTANTS.getObjectTypeFromName(node.name.value);
+      var type = node.name.value === 'object' ? -1 : ng.CONSTANTS.getObjectTypeFromName(node.name.value);
       var object_ids = [];
       var count = null;
       var offset = null;
@@ -179,11 +179,17 @@ async function parseSet(ng, DB, viewer, object, nodes) {
           arg.value.values.forEach(id => object_ids.push(id.value));
           missing = false;
         } else if (arg.name.value === 'point') {
+          if (type === -1) {
+            throw NError.normal('Cannot fetch by  point without supplying object type');
+          }
           var [lat, lng, distance] = arg.value.values;
           var matches = await DB.lookupGeoIndex({lat: lat.value, lng: lng.value}, [type], (distance.value || 1) * 1.6 * 1000);
           index_object_ids.geo = matches || [];
           missing = false;
         } else if (arg.name.value === 'text_index') {
+          if (type === -1) {
+            throw NError.normal('Cannot fetch by text without supplying object type');
+          }
           var text_indices = ng.CONSTANTS.getObject(type).text_index || {};
           index_object_ids.text = [];
           await Promise.all(Object.keys(text_indices).map(async index_type => {
@@ -204,6 +210,9 @@ async function parseSet(ng, DB, viewer, object, nodes) {
             offset = null;
           }
         } else {
+          if (type === -1) {
+            throw NError.normal('Cannot fetch by index without supplying object type');
+          }
           var matches = await DB.lookupIndex(type, arg.name.value, arg.value.value);
           index_object_ids[arg.name.value] = matches || [];
           missing = false;
@@ -212,7 +221,6 @@ async function parseSet(ng, DB, viewer, object, nodes) {
       if (missing) {
         if (node.name.value === 'viewer') {
           object_ids.push(viewer.getID());
-          type = 0;
         } else {
           var config = ng.CONSTANTS.getObject(type);
           if (!config.root_id) {
@@ -237,7 +245,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
       var fetched = [];
       await Promise.all(object_ids.map(async object_id => {
         var object = await DB.getObject(viewer, object_id);
-        if (object && (object.getType() !== type)) {
+        if (type !== -1 && object && (object.getType() !== type)) {
           throw NError.normal('Object type does not match requested type');
         }
         if (object) {
