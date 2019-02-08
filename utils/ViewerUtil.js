@@ -3,8 +3,8 @@ const Param = require('./Param.js');
 
 class ViewerUtil {
 
-  static async validate(ng, req) {
-    var viewer = await ng.COGNITO.validate(Param(req).get('token'));
+  static async validate(cognito, req) {
+    var viewer = await cognito.validate(Param(req).get('token'));
     req.viewer = viewer;
     return viewer;
   }
