@@ -5,7 +5,6 @@
   "main": "main.js",
   "dependencies": {
     "aws-sdk": "^2.398.0",
-    "cognito-express": "^2.0.14",
     "delay": "^3.1.0",
     "graphql": "^0.13.2",
     "multer": "^1.4.1",
