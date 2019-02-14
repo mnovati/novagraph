@@ -13,7 +13,9 @@
     "phone": "^2.3.5",
     "sharp": "^0.20.8",
     "uuid": "^3.3.2",
-    "uuid-validate": "^0.0.2"
+    "uuid-validate": "^0.0.2",
+    "jsonwebtoken": "^8.4.0",
+    "jwks-rsa": "^1.4.0"
   },
   "engines": {
     "node": "^5.11.0"
