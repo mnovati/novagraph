@@ -133,7 +133,9 @@ async function parseSet(ng, DB, viewer, object, nodes) {
         var object_data = await object.getData();
         if (node.name.value in object_data) {
           var object_value = object_data[node.name.value];
-          if (Array.isArray(object_value)) {
+          if (!object_value) {
+            // do nothing, the field isn't set on this object
+          } else if (Array.isArray(object_value)) {
             object_value.forEach(id => {
               if ((typeof id === 'string' || id instanceof String) && id.length > 0) {
                 ids_to_fetch[id] = true;
