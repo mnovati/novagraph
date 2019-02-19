@@ -64,7 +64,10 @@ class ResponseUtils {
 				dedup[key] = true;
 				var object = await this._DB.getObject(read_all_viewer, edge.from_id);
 				edge = Object.assign({}, edge);
+        edge.from_type = object.getAPIType();
 				edge.type = (object ? object.getAPIType() : 'null') + '/' + Constants.Edges[edge.type].api_name;
+        var to_object = await this._DB.getObject(read_all_viewer, edge.to_id);
+        edge.to_type = to_object.getAPIType();
 				return edge;
 			}));
 			out.edge_counts = out.edge_counts.filter(Boolean);
