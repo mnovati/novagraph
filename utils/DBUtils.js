@@ -189,7 +189,7 @@ class DBUtils {
     }
     var existing = await this._DB.getSingleEdge(viewer, from_id, edge_type, to_id);
     if (!existing) {
-      throw NError.normal('Cannot cannot be loaded or may not exists');
+      throw NError.normal('Edge cannot be loaded or may not exists');
     }
     await this._DB.deleteEdge(viewer, existing);
   }
