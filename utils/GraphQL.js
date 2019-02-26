@@ -376,7 +376,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
         if (edge_type === null) {
           throw NError.normal('Invalid edge type', { type: node.name.value });
         }
-        result = await Promise.all(to_ids.map(async to_id => {
+        result = await Promise.all(delete_to_ids.map(async to_id => {
           return await DB.deleteEdge(viewer, ng.CONSTANTS.getEdgeInstance(viewer, {
             from_id: object.getID(),
             to_id: to_id,
@@ -385,7 +385,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           }));
         }));
       } else if (delete_from_ids.length > 0) {
-        result = await Promise.all(from_ids.map(async from_id => {
+        result = await Promise.all(delete_from_ids.map(async from_id => {
           var from_object = await DB.getObject(viewer, from_id);
           var edge_type = ng.CONSTANTS.getEdgeTypeFromName(from_object.getType(), node.name.value);
           if (edge_type === null) {
