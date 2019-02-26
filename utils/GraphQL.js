@@ -384,6 +384,10 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
             data: data === null ? '' : data
           }));
         }));
+        if (result.filter(Boolean).length !== delete_to_ids.length) {
+          throw NError.normal('Error deleting edges', { type: node.name.value, ids: delete_to_ids });
+        }
+        result = [];
       } else if (delete_from_ids.length > 0) {
         result = await Promise.all(delete_from_ids.map(async from_id => {
           var from_object = await DB.getObject(viewer, from_id);
@@ -398,6 +402,10 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
             data: data === null ? '' : data
           }));
         }));
+        if (result.filter(Boolean).length !== delete_from_ids.length) {
+          throw NError.normal('Error deleting edges', { type: node.name.value, ids: delete_from_ids });
+        }
+        result = [];
       }
       result = (result || []).filter(Boolean);
 
