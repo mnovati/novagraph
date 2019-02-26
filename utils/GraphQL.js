@@ -195,7 +195,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
           var text_indices = ng.CONSTANTS.getObject(type).text_index || {};
           index_object_ids.text = [];
           await Promise.all(Object.keys(text_indices).map(async index_type => {
-            var matches = await DB.lookupTextIndex(index_type, arg.value.value);
+            var matches = await DB.lookupTextIndex(index_type, (arg.value.value || '').trim());
             (matches || []).forEach(id => index_object_ids.text.push(id));
           }));
           missing = false;
