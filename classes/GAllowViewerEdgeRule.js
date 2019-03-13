@@ -5,7 +5,7 @@ class GAllowViewerEdgeRule extends GRule {
   constructor(type) {
     super();
     if (type !== 'source' && type !== 'dest' && type !== 'either') {
-      type = either;
+      type = 'either';
     }
     this.type = type;
   }
