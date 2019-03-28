@@ -7,6 +7,7 @@
 4) utility functions to hook into a node.js server, including GraphQL-like query engine
 
 ==ASSUMPTIONS==
+
 0) code is rought around the edges and not super well architected to support quick iteration
 1) only supports single DB SQL backend
 2) only supports AWS Cognito User Pool AND/OR Identity Pool for authentication
