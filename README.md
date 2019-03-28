@@ -8,7 +8,7 @@
 
 ==ASSUMPTIONS==
 
-0) code is rought around the edges and not super well architected to support quick iteration
+0) code is rough around the edges and not super well architected to support quick iteration
 1) only supports single DB SQL backend
 2) only supports AWS Cognito User Pool AND/OR Identity Pool for authentication
 3) only supports node.js/JS server integration
