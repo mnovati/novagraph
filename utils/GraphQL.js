@@ -130,9 +130,16 @@ async function parseSet(ng, DB, viewer, object, nodes) {
           ids_to_fetch = {};
         }
       } else {
-        var object_data = await object.getData();
-        if (node.name.value in object_data) {
-          var object_value = object_data[node.name.value];
+        var use_name = node.name.value;
+        var object_data = {};
+        if (use_name.startsWith('viewer_data.')) {
+          use_name = use_name.substring(12);
+          object_data = await object.getViewerData();
+        } else {
+          object_data = await object.getData();
+        }
+        if (use_name in object_data) {
+          var object_value = object_data[use_name];
           if (!object_value) {
             // do nothing, the field isn't set on this object
           } else if (Array.isArray(object_value)) {

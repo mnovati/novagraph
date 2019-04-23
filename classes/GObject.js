@@ -26,8 +26,19 @@ class GObject {
     return this.object.data;
   }
 
+  async getViewerData() {
+    return {};
+  }
+
   async getRaw() {
-    return Object.assign({}, this.object);
+    var base = Object.assign({}, this.object);
+    var processed_data = await this.getData();
+    base.data = await this.getData();
+    var viewer_data = await this.getViewerData();
+    if (Object.keys(viewer_data).length > 0) {
+      base.viewer_data = await viewer_data;
+    }
+    return Object.assign({}, base);
   }
 
   async filterField(key) {
