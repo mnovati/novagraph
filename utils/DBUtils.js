@@ -24,7 +24,9 @@ class DBUtils {
         throw NError.normal('Object type does not match requested type');
       }
       var old_data = await old_object.getData();
-      data['creator_id'] = old_data.creator_id;
+      if ('creator_id' in old_data) {
+        data['creator_id'] = old_data.creator_id;
+      }
       var result = await this._DB.modifyObject(viewer, Constants.getObjectInstance(viewer, {
         id: object_id,
         type: type,
