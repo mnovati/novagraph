@@ -7,6 +7,7 @@ class GType {
 
   setNull() {
     this.nullable = true;
+    return this;
   }
 
   check(value) {
