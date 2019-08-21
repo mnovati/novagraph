@@ -1,5 +1,6 @@
 const graphql = require('graphql/language');
 const NError = require('../lib/error.js');
+const DBUtils = require('./DBUtils.js');
 
 async function parseSet(ng, DB, viewer, object, nodes) {
   var objects = {};
@@ -428,6 +429,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
       var type = ng.CONSTANTS.getObjectTypeFromName(node.name.value);
       var data = null;
       var object_ids = [];
+      var delete_object_ids = [];
       var missing = true;
       await Promise.all((node.arguments || []).map(async arg => {
         if (arg.name.value === 'id') {
@@ -435,6 +437,12 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           missing = false;
         } else if (arg.name.value === 'ids') {
           arg.value.values.forEach(id => object_ids.push(id.value));
+          missing = false;
+        } else if (arg.name.value === 'delete_id') {
+          delete_object_ids.push(arg.value.value);
+          missing = false;
+        } else if (arg.name.value === 'delete_ids') {
+          arg.value.values.forEach(id => delete_object_ids.push(id.value));
           missing = false;
         } else if (arg.name.value === 'data') {
           data = JSON.parse(arg.value.value);
@@ -445,6 +453,12 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           object_ids.push(viewer.getID());
           type = 0;
         }
+      }
+      if (object_ids.length > 0 && delete_object_ids.length > 0) {
+        throw NError.normal('Cannot modify and delete in the same query');
+      }
+      if (data !== null && delete_object_ids.length > 0) {
+        throw NError.normal('Cannot provide data when deleting objects');
       }
       if (data !== null) {
         if (object_ids.length === 0) {
@@ -469,6 +483,11 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
             }
           }));
         }
+      }
+      if (delete_object_ids.length > 0) {
+        await Promise.all(object_ids.map(async object_id => {
+          await DBUtils(DB).deleteObjectAndEdges(viewer, object_id, type);
+        }));
       }
 
       await Promise.all(object_ids.map(async object_id => {
