@@ -485,7 +485,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
         }
       }
       if (delete_object_ids.length > 0) {
-        await Promise.all(object_ids.map(async object_id => {
+        await Promise.all(delete_object_ids.map(async object_id => {
           await DBUtils(DB).deleteObjectAndEdges(viewer, object_id, type);
         }));
       }
