@@ -343,7 +343,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
         } else if (arg.name.value === 'delete_from_ids') {
           arg.value.values.forEach(id => delete_from_ids.push(id.value));
         } else if (arg.name.value === 'data') {
-          data = arg.value.value;
+          data = decodeURI(arg.value.value);
         }
       }));
       if ((to_ids.length > 0 || has_to_ids) && from_ids.length > 0) {
@@ -445,7 +445,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           arg.value.values.forEach(id => delete_object_ids.push(id.value));
           missing = false;
         } else if (arg.name.value === 'data') {
-          data = JSON.parse(arg.value.value);
+          data = JSON.parse(decodeURI(arg.value.value));
         }
       }));
       if (missing) {
