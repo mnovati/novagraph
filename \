@@ -559,16 +559,6 @@ class DB {
         checkEdgeCreate(this, viewer, r_edge)
       ]);
       viewer._incrQueryCount();
-      var [rows, _] = await this.execute(`
-          SELECT * FROM edges
-          WHERE (from_id=uuid2bin(?) AND to_id=uuid2bin(?) AND type=? AND status=?) or
-            (from_id=uuid2bin(?) AND to_id=uuid2bin(?) AND type=? AND status=?)
-        `, [edge.getFromID(), edge.getToID(), edge.getType(), Constants.Status.VISIBLE,
-            r_edge.getFromID(), r_edge.getToID(), r_edge.getType(), Constants.Status.VISIBLE]
-      );
-      if (rows && rows.length > 0) {
-        return false;
-      }
       var [result, _] = await this.execute(`
           INSERT INTO edges (from_id, type, to_id, data, status) VALUES
           (uuid2bin(?), ?, uuid2bin(?), ?, ?),
@@ -588,7 +578,7 @@ class DB {
         `, [edge.getFromID(), edge.getToID(), edge.getType(), Constants.Status.VISIBLE]
       );
       if (rows && rows.length > 0) {
-        return false;
+        return -;
       }
       var [result, _] = await this.execute(`
           INSERT INTO edges (from_id, type, to_id, data, status) VALUES (uuid2bin(?), ?, uuid2bin(?), ?, ?)
