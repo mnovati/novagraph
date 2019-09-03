@@ -41,8 +41,18 @@ class GObject {
     return Object.assign({}, base);
   }
 
-  async filterField(key) {
-    return true;
+  async canSeeField(key) {
+    const Constants = require('../lib/constants.js');
+    return await this._can(
+      ((Constants.getObject(this.getType()).field_privacy || {})[key] || {}).cansee || []
+    );
+  }
+
+  async canModifyField(key) {
+    const Constants = require('../lib/constants.js');
+    return await this._can(
+      ((Constants.getObject(this.getType()).field_privacy || {})[key] || {}).canmodify || []
+    );
   }
 
   // these are functions used internally that shouldn't be overwritten
