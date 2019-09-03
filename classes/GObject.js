@@ -1,3 +1,5 @@
+const GAllowAllRule = require('./GAllowAllRule.js');
+
 class GObject {
 
   constructor(viewer, object) {
@@ -44,14 +46,14 @@ class GObject {
   async canSeeField(key) {
     const Constants = require('../lib/constants.js');
     return await this._can(
-      ((Constants.getObject(this.getType()).field_privacy || {})[key] || {}).cansee || []
+      ((Constants.getObject(this.getType()).field_privacy || {})[key] || {}).cansee || [new GAllowAllRule()]
     );
   }
 
   async canModifyField(key) {
     const Constants = require('../lib/constants.js');
     return await this._can(
-      ((Constants.getObject(this.getType()).field_privacy || {})[key] || {}).canmodify || []
+      ((Constants.getObject(this.getType()).field_privacy || {})[key] || {}).canmodify || [new GAllowAllRule()]
     );
   }
 
