@@ -20,5 +20,13 @@ class GType {
   checkImpl(value) {
     return true;
   }
+
+  normalize(value) {
+    return this.normalizeImpl(value);
+  }
+
+  normalizeImpl(value) {
+    return value;
+  }
 }
 module.exports = GType;
