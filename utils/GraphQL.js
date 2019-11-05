@@ -346,6 +346,10 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           data = decodeURI(arg.value.value);
         }
       }));
+      to_ids = to_ids.filter(Boolean);
+      from_ids = from_ids.filter(Boolean);
+      delete_to_ids = delete_to_ids.filter(Boolean);
+      delete_from_ids = delete_from_ids.filter(Boolean);
       if ((to_ids.length > 0 || has_to_ids) && from_ids.length > 0) {
         throw NError.normal('Can only have to or from ids but not both in edge mutation');
       }
