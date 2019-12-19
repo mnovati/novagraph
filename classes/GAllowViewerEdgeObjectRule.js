@@ -4,9 +4,13 @@ const NError = require('../lib/error.js');
 
 class GAllowViewerEdgeObjectRule extends GRule {
 
-  constructor(edges) {
+  constructor(edges, type) {
     super();
     this.edges = edges;
+    if (type !== 'source' && type !== 'dest') {
+      type = 'dest';
+    }
+    this.type = type;
   }
 
   async can(object) {
@@ -18,7 +22,12 @@ class GAllowViewerEdgeObjectRule extends GRule {
       throw NError.normal('Invalid edges provided to edge-based privacy rule');
     }
     var result = await Promise.all(this.edges.map(async (e) => {
-      var edge = await DB.getSingleEdge(new ReadAllViewer(0), object.getID(), e, object.getViewer().getID());
+      var edge = await DB.getSingleEdge(
+        new ReadAllViewer(0),
+        this.type === 'dest' ? object.getID() : object.getViewer().getID(),
+        e,
+        this.type === 'dest' ? object.getViewer().getID() : object.getID(),
+      );
       return !!edge;
     }));
     return result.filter(Boolean).length > 0 ? this.pass() : this.skip();
