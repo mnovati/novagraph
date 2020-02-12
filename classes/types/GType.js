@@ -10,14 +10,14 @@ class GType {
     return this;
   }
 
-  check(value) {
+  check(viewer, value) {
     if (value === null) {
       return !!this.nullable;
     }
-    return this.checkImpl(value);
+    return this.checkImpl(viewer, value);
   }
 
-  checkImpl(value) {
+  checkImpl(viewer, value) {
     return true;
   }
 

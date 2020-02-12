@@ -6,7 +6,7 @@ class GIntType extends GType {
     super();
   }
 
-  checkImpl(value) {
+  checkImpl(viewer, value) {
     return typeof value === 'number' && isFinite(value) && Number.isInteger(value);
   }
 }

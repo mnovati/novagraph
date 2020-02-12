@@ -6,7 +6,7 @@ class GStringType extends GType {
     super();
   }
 
-  checkImpl(value) {
+  checkImpl(viewer, value) {
     return typeof value === 'string' || value instanceof String;
   }
 }

@@ -6,7 +6,7 @@ class GFloatType extends GType {
     super();
   }
 
-  checkImpl(_value) {
+  checkImpl(viewer, value) {
     var value = parseFloat(value);
     return typeof value === 'number' && isFinite(value);
   }

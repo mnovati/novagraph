@@ -6,7 +6,7 @@ class GBoolType extends GType {
     super();
   }
 
-  checkImpl(value) {
+  checkImpl(viewer, value) {
     return value === true || value === false;
   }
 }

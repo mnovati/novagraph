@@ -7,12 +7,12 @@ class GArrayType extends GType {
     this.type = type;
   }
 
-  checkImpl(value) {
+  checkImpl(viewer, value) {
     if (!Array.isArray(value)) {
       return false;
     }
     for (var ii = 0; ii < value.length; ii++) {
-      if (!this.type.check(value[ii])) {
+      if (!this.type.check(viewer, value[ii])) {
         return false;
       }
     }
