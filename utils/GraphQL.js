@@ -519,12 +519,22 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
 class GraphQL {
 
   static async execute(ng, DB, viewer, query) {
-    var node = graphql.parse(query);
+    var node = null;
+    try {
+      node = graphql.parse(query);
+    } catch (e){
+      throw NError.normal(e.message, e);
+    }
     return await parseSet(ng, DB, viewer, null, node.definitions[0].selectionSet);
   }
 
   static async mutate(ng, DB, viewer, query) {
-    var node = graphql.parse(query);
+    var node = null;
+    try {
+      node = graphql.parse(query);
+    } catch (e){
+      throw NError.normal(e.message, e);
+    }
     return await parseMutationSet(ng, DB, viewer, null, node.definitions[0].selectionSet);
   }
 }
