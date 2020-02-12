@@ -10,22 +10,22 @@ class GType {
     return this;
   }
 
-  check(viewer, value) {
+  async check(viewer, value) {
     if (value === null) {
       return !!this.nullable;
     }
-    return this.checkImpl(viewer, value);
+    return await this.checkImpl(viewer, value);
   }
 
-  checkImpl(viewer, value) {
+  async checkImpl(viewer, value) {
     return true;
   }
 
-  normalize(value) {
-    return this.normalizeImpl(value);
+  async normalize(value) {
+    return await this.normalizeImpl(value);
   }
 
-  normalizeImpl(value) {
+  async normalizeImpl(value) {
     return value;
   }
 }

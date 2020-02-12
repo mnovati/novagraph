@@ -8,16 +8,16 @@ class GUUIDType extends GType {
     this.types = types || [];
   }
 
-  checkImpl(viewer, value) {
+  async checkImpl(viewer, value) {
     if (!uuidValidate(value)) {
       return false;
     }
     if (this.types.length > 0) {
-      //const DB = require('../../lib/db.js');
-      //var object = await DB.getObject(viewer.getReadAllViewer(), value);
-      //if (!object || !this.types.includes(object.getType())) {
-      //  return false;
-      //}
+      const DB = require('../../lib/db.js');
+      var object = await DB.getObject(viewer.getReadAllViewer(), value);
+      if (!object || !this.types.includes(object.getType())) {
+        return false;
+      }
     }
     return true;
   }

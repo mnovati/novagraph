@@ -7,16 +7,14 @@ class GArrayType extends GType {
     this.type = type;
   }
 
-  checkImpl(viewer, value) {
+  async checkImpl(viewer, value) {
     if (!Array.isArray(value)) {
       return false;
     }
-    for (var ii = 0; ii < value.length; ii++) {
-      if (!this.type.check(viewer, value[ii])) {
-        return false;
-      }
-    }
-    return true;
+    var each = await Promise.all(value.map(async v => {
+      return await this.type.check(viewer, v);
+    }));
+    return each.filter(Boolean).length === value.length;
   }
 }
 module.exports = GArrayType;
