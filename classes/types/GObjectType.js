@@ -13,6 +13,7 @@ class GObjectType extends GType {
     }
     var out = true;
     await Promise.all(Object.keys(this.schema).map(async key => {
+      if (!out) { return; }
       if (key in value) {
         var result = await this.schema[key].check(viewer, value[key]);
         if (!result) {
