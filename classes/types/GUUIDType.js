@@ -15,7 +15,10 @@ class GUUIDType extends GType {
     if (this.types.length > 0) {
       const DB = require('../../lib/db.js');
       var object = await DB.getObject(viewer.getReadAllViewer(), value);
-      if (!object || !this.types.includes(object.getType())) {
+      // if object can't be loaded by read-all viewer, it must be deleted
+      // so we should ignore this check to prevent failure when editing
+      // objects referencing deleted ids
+      if (object && !this.types.includes(object.getType())) {
         return false;
       }
     }
