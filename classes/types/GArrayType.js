@@ -4,12 +4,16 @@ class GArrayType extends GType {
 
   constructor(type) {
     super();
-    this.type = type;
+    this.type = type || null;
   }
 
   async checkImpl(viewer, value) {
     if (!Array.isArray(value)) {
       return false;
+    }
+    // array of unspecified types
+    if (!this.type) {
+      return true;
     }
     var each = await Promise.all(value.map(async v => {
       return await this.type.check(viewer, v);
