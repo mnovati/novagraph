@@ -15,8 +15,8 @@ class Param {
       return this._req.body[key];
     } else if (key in this._req.params) {
       return this._req.params[key];
-    } else if (this._req.get(key)) {
-      return this._req.get(key);
+    } else if (this._req.get('x-'+key)) {
+      return this._req.get('x-'+key);
     }
     return null;
   }
