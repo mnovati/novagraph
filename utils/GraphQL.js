@@ -480,7 +480,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
             var result = await DB.modifyObject(viewer, ng.CONSTANTS.getObjectInstance(viewer, {
               id: object_id,
               type: type,
-              data: data
+              data: Object.assign({}, data),
             }));
             if (!result) {
               throw NError.normal('Failed to update object', { id: object_id });
