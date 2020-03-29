@@ -38,6 +38,9 @@ class Viewer {
 
   deleteCache(key) {
     delete this.cache[key];
+    if (this.readAll) {
+      this.readAll.deleteCache(key);
+    }
   }
 
   existsPending(key) {
