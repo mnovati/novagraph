@@ -57,6 +57,12 @@ class GObject {
     );
   }
 
+  async canCreateField(key) {
+    const Constants = require('../lib/constants.js');
+    var config = (Constants.getObject(this.getType()).field_privacy || {})[key] || {};
+    return await this._can(config.cancreate || config.canmodify || [new GAllowAllRule()]);
+  }
+
   // these are functions used internally that shouldn't be overwritten
 
   async canSee() {
