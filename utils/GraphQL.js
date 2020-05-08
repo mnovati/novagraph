@@ -224,7 +224,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
             throw NError.normal('Cannot fetch by index without supplying object type');
           }
           var matches = await DB.lookupIndex(type, arg.name.value, arg.value.value);
-          index_object_ids[arg.name.value] = matches || [];
+          index_object_ids[arg.name.value] = (index_object_ids[arg.name.value] || []).concat(matches || []);
           missing = false;
         }
       }));
