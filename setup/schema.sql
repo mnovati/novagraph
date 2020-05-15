@@ -116,3 +116,14 @@ CREATE TABLE `deferindices` (
   PRIMARY KEY (`id`),
   INDEX (`type`, `defer_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+DROP TABLE IF EXISTS `dateindices`;
+CREATE TABLE `dateindices` (
+  `id` binary(16) NOT NULL,
+  `type` smallint(5) unsigned NOT NULL,
+  `field` varchar(80) NOT NULL,
+  `index_time` datetime NOT NULL,
+  PRIMARY KEY (`id`, `field`),
+  INDEX (`type`, `field`, `index_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

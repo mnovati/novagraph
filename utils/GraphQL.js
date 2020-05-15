@@ -223,9 +223,15 @@ async function parseSet(ng, DB, viewer, object, nodes) {
           if (type === -1) {
             throw NError.normal('Cannot fetch by index without supplying object type');
           }
-          var matches = await DB.lookupIndex(type, arg.name.value, arg.value.value);
-          index_object_ids[arg.name.value] = (index_object_ids[arg.name.value] || []).concat(matches || []);
-          missing = false;
+          var config = ng.CONSTANTS.getObject(type);
+          if ((config.index || []).includes(arg.name.value) || (config.unique_index || []).includes(arg.name.value)) {
+            var matches = await DB.lookupIndex(type, arg.name.value, arg.value.value);
+            index_object_ids[arg.name.value] = (index_object_ids[arg.name.value] || []).concat(matches || []);
+          } else if ((config.time_index || []).includes(arg.name.value)) {
+            var split = arg.value.value.split(':');
+            var matches = await DB.lookupTimeIndex(type, arg.name.value, split[0], split[1] || null);
+            index_object_ids[arg.name.value] = (index_object_ids[arg.name.value] || []).concat(matches || []);
+          }
         }
       }));
       if (missing) {
