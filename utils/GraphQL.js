@@ -181,6 +181,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
       var after = null;
       var missing = true;
       var index_object_ids = {};
+      var index_intersect = true;
       await Promise.all((node.arguments || []).map(async arg => {
         if (arg.name.value === 'id') {
           object_ids.push(arg.value.value);
@@ -233,6 +234,8 @@ async function parseSet(ng, DB, viewer, object, nodes) {
             var matches = await DB.lookupTimeIndex(type, arg.name.value, split[0], split[1] || null);
             index_object_ids[arg.name.value] = (index_object_ids[arg.name.value] || []).concat(matches || []);
             missing = false;
+          } else if (arg.name.value === 'index_intersect') {
+            index_intersect = !!arg.value.value;
           }
         }
       }));
@@ -251,11 +254,13 @@ async function parseSet(ng, DB, viewer, object, nodes) {
 
       // find intersection of all indices used
       var to_merge = Object.values(index_object_ids);
-      if (to_merge.length > 0) {
+      while (to_merge.length > 0) {
         var intersection = to_merge.shift();
-        while (to_merge.length > 0) {
-          var next = to_merge.shift();
-          intersection = intersection.filter(x => next.includes(x));
+        if (index_intersect) {
+          while (to_merge.length > 0) {
+            var next = to_merge.shift();
+            intersection = intersection.filter(x => next.includes(x));
+          }
         }
         intersection.forEach(id => object_ids.push(id));
       }
