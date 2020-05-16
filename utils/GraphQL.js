@@ -180,8 +180,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
       var offset = null;
       var after = null;
       var missing = true;
-      var index_object_ids = {};
-      var index_intersect = true;
+      var index_object_ids = [];
       await Promise.all((node.arguments || []).map(async arg => {
         if (arg.name.value === 'id') {
           object_ids.push(arg.value.value);
@@ -195,18 +194,21 @@ async function parseSet(ng, DB, viewer, object, nodes) {
           }
           var [lat, lng, distance] = arg.value.values;
           var matches = await DB.lookupGeoIndex({lat: lat.value, lng: lng.value}, [type], (distance.value || 1) * 1.6 * 1000);
-          index_object_ids.geo = matches || [];
+          index_object_ids.push(matches || []);
           missing = false;
         } else if (arg.name.value === 'text_index') {
           if (type === -1) {
             throw NError.normal('Cannot fetch by text without supplying object type');
           }
           var text_indices = ng.CONSTANTS.getObject(type).text_index || {};
-          index_object_ids.text = [];
-          await Promise.all(Object.keys(text_indices).map(async index_type => {
-            var matches = await DB.lookupTextIndex(index_type, (arg.value.value || '').trim());
-            (matches || []).forEach(id => index_object_ids.text.push(id));
+          var to_add = [];
+          await Promise.all((arg.value.values || [arg.value.value]).map(async term => {
+            await Promise.all(Object.keys(text_indices).map(async index_type => {
+              var matches = await DB.lookupTextIndex(index_type, (term || '').trim());
+              (matches || []).forEach(id => to_add.push(id));
+            }));
           }));
+          index_object_ids.push(to_add);
           missing = false;
         } else if (arg.name.value === 'first') {
           count = parseInt(arg.value.value);
@@ -225,18 +227,22 @@ async function parseSet(ng, DB, viewer, object, nodes) {
             throw NError.normal('Cannot fetch by index without supplying object type');
           }
           var config = ng.CONSTANTS.getObject(type);
+          var to_add = [];
           if ((config.index || []).includes(arg.name.value) || (config.unique_index || []).includes(arg.name.value)) {
-            var matches = await DB.lookupIndex(type, arg.name.value, arg.value.value);
-            index_object_ids[arg.name.value] = (index_object_ids[arg.name.value] || []).concat(matches || []);
+            await Promise.all((arg.value.values || [arg.value.value]).map(async term => {
+              var matches = await DB.lookupIndex(type, arg.name.value, term);
+              to_add = to_add.concat(matches || []);
+            }));
             missing = false;
           } else if ((config.time_index || []).includes(arg.name.value)) {
-            var split = arg.value.value.split(' ');
-            var matches = await DB.lookupTimeIndex(type, arg.name.value, split[0], split[1] || null);
-            index_object_ids[arg.name.value] = (index_object_ids[arg.name.value] || []).concat(matches || []);
+            await Promise.all((arg.value.values || [arg.value.value]).map(async term => {
+              var split = term.split(' ');
+              var matches = await DB.lookupTimeIndex(type, arg.name.value, split[0], split[1] || null);
+              to_add = to_add.concat(matches || []);
+            }));
             missing = false;
-          } else if (arg.name.value === 'index_intersect') {
-            index_intersect = !!arg.value.value;
           }
+          index_object_ids.push(to_add);
         }
       }));
       if (missing) {
@@ -254,13 +260,11 @@ async function parseSet(ng, DB, viewer, object, nodes) {
 
       // find intersection of all indices used
       var to_merge = Object.values(index_object_ids);
-      while (to_merge.length > 0) {
+      if (to_merge.length > 0) {
         var intersection = to_merge.shift();
-        if (index_intersect) {
-          while (to_merge.length > 0) {
-            var next = to_merge.shift();
-            intersection = intersection.filter(x => next.includes(x));
-          }
+        while (to_merge.length > 0) {
+          var next = to_merge.shift();
+          intersection = intersection.filter(x => next.includes(x));
         }
         intersection.forEach(id => object_ids.push(id));
       }
