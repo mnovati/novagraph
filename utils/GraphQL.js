@@ -202,9 +202,9 @@ async function parseSet(ng, DB, viewer, object, nodes) {
           }
           var text_indices = ng.CONSTANTS.getObject(type).text_index || {};
           var to_add = [];
-          await Promise.all((arg.value.values || [arg.value.value]).map(async term => {
+          await Promise.all((arg.value.values || [arg.value]).map(async term => {
             await Promise.all(Object.keys(text_indices).map(async index_type => {
-              var matches = await DB.lookupTextIndex(index_type, (term || '').trim());
+              var matches = await DB.lookupTextIndex(index_type, (term.value || '').trim());
               (matches || []).forEach(id => to_add.push(id));
             }));
           }));
@@ -229,14 +229,14 @@ async function parseSet(ng, DB, viewer, object, nodes) {
           var config = ng.CONSTANTS.getObject(type);
           var to_add = [];
           if ((config.index || []).includes(arg.name.value) || (config.unique_index || []).includes(arg.name.value)) {
-            await Promise.all((arg.value.values || [arg.value.value]).map(async term => {
-              var matches = await DB.lookupIndex(type, arg.name.value, term);
+            await Promise.all((arg.value.values || [arg.value]).map(async term => {
+              var matches = await DB.lookupIndex(type, arg.name.value, term.value);
               to_add = to_add.concat(matches || []);
             }));
             missing = false;
           } else if ((config.time_index || []).includes(arg.name.value)) {
-            await Promise.all((arg.value.values || [arg.value.value]).map(async term => {
-              var split = term.split(' ');
+            await Promise.all((arg.value.values || [arg.value]).map(async term => {
+              var split = term.value.split(' ');
               var matches = await DB.lookupTimeIndex(type, arg.name.value, split[0], split[1] || null);
               to_add = to_add.concat(matches || []);
             }));
