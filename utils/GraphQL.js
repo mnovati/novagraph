@@ -190,7 +190,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
           missing = false;
         } else if (arg.name.value === 'point') {
           if (type === -1) {
-            throw NError.normal('Cannot fetch by  point without supplying object type');
+            throw NError.normal('Cannot fetch by point without supplying object type');
           }
           var [lat, lng, distance] = arg.value.values;
           var matches = await DB.lookupGeoIndex({lat: lat.value, lng: lng.value}, [type], (distance.value || 1) * 1.6 * 1000);
@@ -488,17 +488,14 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           object_ids.push(id);
         } else {
           await Promise.all(object_ids.map(async object_id => {
-            var old_object = await DB.getObject(viewer, object_id);
-            if (old_object && (old_object.getType() !== type)) {
+            var master = await DB.getObject(viewer.getReadAllViewer(), object_id);
+            if (master && (master.getType() !== type)) {
               throw NError.normal('Object type does not match requested type');
             }
-            var old_data = await old_object.getData();
-            data.creator_id = old_data.creator_id;
-            var result = await DB.modifyObject(viewer, ng.CONSTANTS.getObjectInstance(viewer, {
-              id: object_id,
-              type: type,
-              data: Object.assign({}, data),
-            }));
+            if ('creator_id' in master.object.data) {
+              data.creator_id = master.object.data.creator_id;
+            }
+            var result = await DB.modifyObjectData(viewer, object_id, type, data)
             if (!result) {
               throw NError.normal('Failed to update object', { id: object_id });
             }

@@ -16,22 +16,17 @@ class DBUtils {
       object_id = await this._DB.createObject(viewer, type, data);
       created_new = true;
     } else {
-      var old_object = await this._DB.getObject(viewer, object_id);
-      if (!old_object) {
+      var master = await this._DB.getObject(viewer.getReadAllViewer(), object_id);
+      if (!master) {
         throw NError.normal('Object ID provided but object cannot be loaded');
       }
-      if (old_object && (old_object.getType() !== type)) {
+      if (master && (master.getType() !== type)) {
         throw NError.normal('Object type does not match requested type');
       }
-      var old_data = await old_object.getData();
-      if ('creator_id' in old_data) {
-        data['creator_id'] = old_data.creator_id;
+      if ('creator_id' in master.object.data) {
+        data.creator_id = master.object.data.creator_id;
       }
-      var result = await this._DB.modifyObject(viewer, Constants.getObjectInstance(viewer, {
-        id: object_id,
-        type: type,
-        data: data
-      }));
+      var result = await this._DB.modifyObjectData(viewer, object_id, type, data);
       if (!result) {
         throw NError.normal('Failed to update object', { id: object_id });
       }
