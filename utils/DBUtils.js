@@ -26,7 +26,7 @@ class DBUtils {
       if ('creator_id' in master.object.data) {
         data.creator_id = master.object.data.creator_id;
       }
-      var result = await this._DB.modifyObjectData(viewer, object_id, type, data);
+      var result = await this._DB.modifyObjectData(viewer, object_id, data);
       if (!result) {
         throw NError.normal('Failed to update object', { id: object_id });
       }
