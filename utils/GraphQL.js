@@ -1,4 +1,5 @@
 const graphql = require('graphql/language');
+const uuidValidate = require('uuid-validate');
 const NError = require('../lib/error.js');
 const DBUtils = require('./DBUtils.js');
 
@@ -145,22 +146,28 @@ async function parseSet(ng, DB, viewer, object, nodes) {
             // do nothing, the field isn't set on this object
           } else if (Array.isArray(object_value)) {
             object_value.forEach(id => {
-              if ((typeof id === 'string' || id instanceof String) && id.length > 0) {
+              if ((typeof id === 'string' || id instanceof String) && uuidValidate(id)) {
                 ids_to_fetch[id] = true;
               } else if (typeof id === 'object') {
                 id = id.id;
-                if ((typeof id === 'string' || id instanceof String) && id.length > 0) {
+                if ((typeof id === 'string' || id instanceof String) && uuidValidate(id)) {
                   ids_to_fetch[id] = true;
                 }
               }
             });
-          } else if ((typeof object_value === 'string' || object_value instanceof String) && object_value.length > 0) {
+          } else if ((typeof object_value === 'string' || object_value instanceof String) && uuidValidate(object_value)) {
             ids_to_fetch[object_value] = true;
           } else if (typeof object_value === 'object') {
             var id = object_value.id;
-            if ((typeof id === 'string' || id instanceof String) && id.length > 0) {
+            if ((typeof id === 'string' || id instanceof String) && uuidValidate(id)) {
               ids_to_fetch[id] = true;
             }
+            var values = Object.values(object_value);
+            values.forEach(id => {
+              if ((typeof id === 'string' || id instanceof String) && uuidValidate(id)) {
+                ids_to_fetch[id] = true;
+              }
+            });
           } else if (object_value) {
             throw NError.normal('Field must contain string or array', {
               field: node.name.value,
