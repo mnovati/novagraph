@@ -46,20 +46,20 @@ class GObject {
   async canSeeField(key) {
     const Constants = require('../lib/constants.js');
     return await this._can(
-      ((Constants.getObject(this.getType()).field_privacy || {})[key] || {}).cansee || [new GAllowAllRule()]
+      ((Constants.getObject(this.getType()).field_privacy || {})[key] || Constants.getObject(this.getType()).field_privacy_fallback || {}).cansee || [new GAllowAllRule()]
     );
   }
 
   async canModifyField(key) {
     const Constants = require('../lib/constants.js');
     return await this._can(
-      ((Constants.getObject(this.getType()).field_privacy || {})[key] || {}).canmodify || [new GAllowAllRule()]
+      ((Constants.getObject(this.getType()).field_privacy || {})[key] || Constants.getObject(this.getType()).field_privacy_fallback || {}).canmodify || [new GAllowAllRule()]
     );
   }
 
   async canCreateField(key) {
     const Constants = require('../lib/constants.js');
-    var config = (Constants.getObject(this.getType()).field_privacy || {})[key] || {};
+    var config = (Constants.getObject(this.getType()).field_privacy || {})[key] || Constants.getObject(this.getType()).field_privacy_fallback || {};
     return await this._can(config.cancreate || config.canmodify || [new GAllowAllRule()]);
   }
 
