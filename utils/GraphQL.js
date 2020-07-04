@@ -3,7 +3,7 @@ const uuidValidate = require('uuid-validate');
 const NError = require('../lib/error.js');
 const DBUtils = require('./DBUtils.js');
 
-async function parseSet(ng, DB, viewer, object, nodes) {
+async function parseSet(NovaGraph, DB, viewer, object, nodes) {
   var objects = {};
   var edges = [];
   var edge_counts = [];
@@ -14,7 +14,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
     if (object) {
       var edge_type = null;
       try {
-        edge_type = ng.CONSTANTS.getEdgeTypeFromName(object.getType(), node.name.value);
+        edge_type = NovaGraph.Constants.getEdgeTypeFromName(object.getType(), node.name.value);
       } catch (e) {
         edge_type = null;
       }
@@ -181,7 +181,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
         objects[object_id] = object;
       }));
     } else {
-      var type = node.name.value === 'object' ? -1 : ng.CONSTANTS.getObjectTypeFromName(node.name.value);
+      var type = node.name.value === 'object' ? -1 : NovaGraph.Constants.getObjectTypeFromName(node.name.value);
       var object_ids = [];
       var count = null;
       var offset = null;
@@ -207,7 +207,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
           if (type === -1) {
             throw NError.normal('Cannot fetch by text without supplying object type');
           }
-          var text_indices = ng.CONSTANTS.getObject(type).text_index || {};
+          var text_indices = NovaGraph.Constants.getObject(type).text_index || {};
           var to_add = [];
           await Promise.all((arg.value.values || [arg.value]).map(async term => {
             await Promise.all(Object.keys(text_indices).map(async index_type => {
@@ -233,7 +233,7 @@ async function parseSet(ng, DB, viewer, object, nodes) {
           if (type === -1) {
             throw NError.normal('Cannot fetch by index without supplying object type');
           }
-          var config = ng.CONSTANTS.getObject(type);
+          var config = NovaGraph.Constants.getObject(type);
           var to_add = [];
           if ((config.index || []).includes(arg.name.value) || (config.unique_index || []).includes(arg.name.value)) {
             await Promise.all((arg.value.values || [arg.value]).map(async term => {
@@ -256,11 +256,11 @@ async function parseSet(ng, DB, viewer, object, nodes) {
         if (node.name.value === 'viewer') {
           object_ids.push(viewer.getID());
         } else {
-          var config = ng.CONSTANTS.getObject(type);
+          var config = NovaGraph.Constants.getObject(type);
           if (!config.root_id) {
             throw NError.normal('Cannot fetch all objects for given type');
           }
-          var edge = await DB.getEdge(viewer, config.root_id, ng.CONSTANTS.ROOT_EDGE);
+          var edge = await DB.getEdge(viewer, config.root_id, NovaGraph.Constants.ROOT_EDGE);
           edge.forEach(e => object_ids.push(e.getToID()));
         }
       }
@@ -318,10 +318,10 @@ async function createOrUpdateEdge(ng, DB, viewer, from_id, type, to_id, data) {
     if (data !== null && data != existing.getData()) {
       var raw_edge = await existing.getRaw();
       raw_edge.data = data;
-      await DB.modifyEdgeData(viewer, ng.CONSTANTS.getEdgeInstance(viewer, raw_edge));
+      await DB.modifyEdgeData(viewer, NovaGraph.Constants.getEdgeInstance(viewer, raw_edge));
     }
   } else {
-    await DB.createEdge(viewer, ng.CONSTANTS.getEdgeInstance(viewer, {
+    await DB.createEdge(viewer, NovaGraph.Constants.getEdgeInstance(viewer, {
       from_id: from_id,
       to_id: to_id,
       type: type,
@@ -385,7 +385,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
       }
       var result;
       if (to_ids.length > 0 || has_to_ids) {
-        var edge_type = ng.CONSTANTS.getEdgeTypeFromName(object.getType(), node.name.value);
+        var edge_type = NovaGraph.Constants.getEdgeTypeFromName(object.getType(), node.name.value);
         if (edge_type === null) {
           throw NError.normal('Invalid edge type', { type: node.name.value });
         }
@@ -400,7 +400,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
       } else if (from_ids.length > 0) {
         result = await Promise.all(from_ids.map(async from_id => {
           var from_object = await DB.getObject(viewer, from_id);
-          var edge_type = ng.CONSTANTS.getEdgeTypeFromName(from_object.getType(), node.name.value);
+          var edge_type = NovaGraph.Constants.getEdgeTypeFromName(from_object.getType(), node.name.value);
           if (edge_type === null) {
             throw NError.normal('Invalid edge type', { type: node.name.value });
           }
@@ -408,12 +408,12 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
         }));
       }
       if (delete_to_ids.length > 0) {
-        var edge_type = ng.CONSTANTS.getEdgeTypeFromName(object.getType(), node.name.value);
+        var edge_type = NovaGraph.Constants.getEdgeTypeFromName(object.getType(), node.name.value);
         if (edge_type === null) {
           throw NError.normal('Invalid edge type', { type: node.name.value });
         }
         result = await Promise.all(delete_to_ids.map(async to_id => {
-          return await DB.deleteEdge(viewer, ng.CONSTANTS.getEdgeInstance(viewer, {
+          return await DB.deleteEdge(viewer, NovaGraph.Constants.getEdgeInstance(viewer, {
             from_id: object.getID(),
             to_id: to_id,
             type: edge_type,
@@ -427,11 +427,11 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
       } else if (delete_from_ids.length > 0) {
         result = await Promise.all(delete_from_ids.map(async from_id => {
           var from_object = await DB.getObject(viewer, from_id);
-          var edge_type = ng.CONSTANTS.getEdgeTypeFromName(from_object.getType(), node.name.value);
+          var edge_type = NovaGraph.Constants.getEdgeTypeFromName(from_object.getType(), node.name.value);
           if (edge_type === null) {
             throw NError.normal('Invalid edge type', { type: node.name.value });
           }
-          return await DB.deleteEdge(viewer, ng.CONSTANTS.getEdgeInstance(viewer, {
+          return await DB.deleteEdge(viewer, NovaGraph.Constants.getEdgeInstance(viewer, {
             from_id: from_id,
             to_id: object.getID(),
             type: edge_type,
@@ -454,7 +454,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
         objects[object_id] = object;
       }));
     } else {
-      var type = ng.CONSTANTS.getObjectTypeFromName(node.name.value);
+      var type = NovaGraph.Constants.getObjectTypeFromName(node.name.value);
       var data = null;
       var object_ids = [];
       var delete_object_ids = [];

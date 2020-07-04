@@ -1,6 +1,3 @@
--- MySQL dump 10.13  Distrib 5.5.59, for Linux (x86_64)
---
-
 DELIMITER //
 
 CREATE FUNCTION uuid2bin(_uuid BINARY(36))
@@ -33,10 +30,6 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/ `novagraph`;
 
 USE `novagraph`;
 
---
--- Table structure for table `edges`
---
-
 DROP TABLE IF EXISTS `edges`;
 CREATE TABLE `edges` (
   `from_id` binary(16) DEFAULT NULL,
@@ -49,10 +42,6 @@ CREATE TABLE `edges` (
   KEY `fromidtype` (`from_id`,`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---
--- Table structure for table `objects`
---
-
 DROP TABLE IF EXISTS `objects`;
 CREATE TABLE `objects` (
   `id` binary(16) NOT NULL,
@@ -64,10 +53,6 @@ CREATE TABLE `objects` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---
--- Table structure for table `indices`
---
-
 DROP TABLE IF EXISTS `indices`;
 CREATE TABLE `indices` (
   `key` binary(20) NOT NULL,
@@ -75,10 +60,6 @@ CREATE TABLE `indices` (
   KEY `keyvalue` (`key`,`value`),
   INDEX `hashlookup` (`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Table structure for table `geo_indices`
---
 
 DROP TABLE IF EXISTS `geoindices`;
 CREATE TABLE `geoindices` (
@@ -89,10 +70,6 @@ CREATE TABLE `geoindices` (
   SPATIAL KEY `shape` (`shape`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---
--- Table structure for table `fts_indices`
---
-
 DROP TABLE IF EXISTS `ftsindices`;
 CREATE TABLE `ftsindices` (
   `id` binary(16) NOT NULL,
@@ -102,11 +79,6 @@ CREATE TABLE `ftsindices` (
   INDEX (`type`),
   FULLTEXT (`data`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
---
--- Table structure for table `deferindices`
---
 
 DROP TABLE IF EXISTS `deferindices`;
 CREATE TABLE `deferindices` (

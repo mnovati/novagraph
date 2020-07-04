@@ -1,106 +1,134 @@
-# novagraph
+# NovaGraph
 
-==SUMMARY OF FEATURES==
-1) graph storage abstraction (objects/entities and edges/associations between them) 
-2) built in privacy rules to protect all data within the abstraction
-3) data model scales indefinitely in theory to any amount of data
-4) utility functions to hook into a node.js server, including GraphQL-like query engine
+##Summary and Purpose
 
-==ASSUMPTIONS==
+NovaGraph is a work in progress project trying to make it as fast as possible to setup a scalable, robust, flexible, and privacy-aware data model for almost any application.
 
-0) code is rough around the edges and not super well architected to support quick iteration
-1) only supports single DB SQL backend
-2) only supports AWS Cognito User Pool AND/OR Identity Pool for authentication
-3) only supports node.js/JS server integration
-4) ready to be used in production
+##Features
 
-==WHAT IS THIS==
-This is a very generic graph storage for user facing applications. You will likely have users
-using your system who have profiles or accounts. And those users will interact with users
-and objects, and have various relationships to those objects (i.e. edges). 
+1. graph storage abstraction (objects w/ unique IDs and edges between them)
+2. low-level privacy and permissions rules, declerative style
+3. data model is meant to scale indefinitely
+4. queries based on GraphQL's query language
 
-This also integrates some privacy and permission concepts, so that at a very low level, you 
-can ensure that people can only access data they should see, rather than implementing those
-rules at a higher level.
+##Limitations
 
-Objects have a UUID uniquely identifying them globally. They also have a type (e.g. "profile")
-and a JSON encoded data field, which can store whatever serialable key-value pairs you want.
+1. this project is an early work in progress/proof of concept
+2. only supports a single SQL DB
+3. only supports AWS Cognito for authentication
+4. there is little to no documentation for how to use a bunch of highly experimental features. it's not usable with help from someone who has set it up before.
+5. the APIs will frequently change and not be backwards compatible
 
-Edges have a type (e.g. "follows"), the ID1 -> ID2 objects that they connect, and some optional
-minimal data for future use. 
+##What Exactly is This?
+NovaGraph a very generic graph storage for user facing applications. Graph data models can be used for almost any application. An Object is anything with a unique ID and a dictionary of data. An Edge is conection of a certain type between two Objects. For example, a user Profile with a name and other fields, would be an Object, and a friend edge between them would be an Edge.
 
-There are much more sophisticated graph/node-edge storage models, query languages, etc... and 
-this doesn't support any of those at this time. This is meant for people who want to get
-started quicky with a clean data model for their user facing app.
+At a storage level, we essentially have a giant dictionary of all Objects, keyed off of their unique IDs. So any key-value/document store model and work with NovaGraph in theory. 
 
-==GETTING STARTED==
+This also integrates some privacy and permission concepts, so that at a very low level, you can ensure that people can only access data they should see, rather than implementing those rules at a higher level. There are no limits to the complexity of privacy rules, making the system both easy to get going with, but usable for arbitrarily complex situations.
 
-A typical implementation will be ROUGHLY the following (more details to get it working, but very high level). This is meant to help you understand the abstraction and is not copy paste code.
+Objects have a UUID uniquely identifying them globally. They also have a type (e.g. "profile") and a JSON encoded data field, which can store whatever serialable key-value pairs you want.
 
-var NovaGraph = require(...);
+Edges have a type (e.g. "follows"), the ID1 -> ID2 objects that they connect, and some optional minimal data for future use. 
 
-NovaGraph.DB.init({
-  host     : <domain>,
-  user     : <user>,
-  password : <password>,
-  database : <database>,
-  ssl      : { ca: fs.readFileSync('./setup/rds-ca-2015-root.pem') } // if using AWS RDS
-});
- 
-NovaGraph.COGNITO.init({
-  region: <aws region>,
-  cognitoUserPoolId: <cognito pool>,
-  tokenUse: "access",
-  tokenExpiration: 3600000
-});
+###Getting Started
 
-NovaGraph.CONSTANTS.setObjects({
-  0: {
-      name: 'Profile',
-      instance: GObject,
-      privacy: {
-        cansee: [new GAllowAllRule()],
-        canmodify: [new GAllowViewerObjectRule()],
-        cancreate: [new GDenyAllRule()],
+1. checkout this code a git submodule in your project
+2. define some objects in a helper file, like this:
+
+    module.exports = {
+    	0: {
+    		name: 'Profile',
+    		instance: GObject,
+    		types: {
+    			name: new GStringType(),
+    		},
+    		field_privacy: {
+    			name: {
+    				cansee: [new GAllowAllRule()],
+    				canmodify: [new GAllowAllRule()],
+    			},
+    		},
+    		privacy: {
+    			cansee: [new GAllowAllRule()],
+    			canmodify: [new GAllowViewerObjectRule()],
+    			cancreate: [new GAllowAllRule()],
+    		},
+    		index: ['name'],
+    		unique_index: ['name'],
+    		text_index: {
+    			0: ['name'],
+    		},
+    		root_id: null,
+    		api_name: 'profile',
       },
-      index: [], // index certain field
-      unique_index: ['cognito_username'], // indexes that are unique
-      text_index: [
-        0: ['field_name'], // full text search indexes
-      ],
-      geo_index: ['field_name'], // lat lng will be indexed for geo based queries
-    },
- });
- NovaGraph.CONSTANTS.setEdges({
-   0: {
-      name: 'ProfileToFriend',
-      instance: GEdge,
-      privacy: {
-        cansee: [new GAllowAllRule],
-        canmodify: [new GAllowViewerEdgeRule(SOURCE)],
-        cancreate: [new GAllowViewerEdgeRule(SOURCE)],
+    }
+
+3. define some edges in a helper file, like this:
+
+	  module.exports = {
+    	0: {
+    		name: 'Friends',
+    		instance: GEdge,
+    		privacy: {
+    			cansee: [new GAllowAllRule()],
+    			canmodify: [new GAllowViewerObjectRule()],
+    			cancreate: [new GAllowAllRule()],
+    		},
+				from_type: [0],
+				to_type: [0],
+				reverse_edge: 'self'
+    		api_name: 'friend',
       },
-      from_type: [0],
-      to_type: [0],
-      reverse_edge: 'self',
-   },
-});
+    }
 
+3. create a new initialization helper file that looks something like this:
 
-NOTE: Some privacy rules are built in, others you can write easily in your own code. 
+   const NovaGraph = require('../lib/novagraph/index.js');
+   const KEYS = require('./keys.js');
+   const OBJECTS = require('./objects.js');
+   const EDGES = require('./edges.js');
+   
+   var instance = null;
+   
+   module.exports = function() {
+     if (instance !== null) {
+       return instance;
+     }
+     instance = {
+       DB: new NovaGraph.DB({
+         client: 'mysql',
+         connection: {
+           host     : KEYS.DB_HOST,
+           user     : KEYS.DB_USER,
+           password : KEYS.DB_PASSWORD,
+           database : KEYS.DB_NAME,
+           ssl      : { ca: fs.readFileSync('./lib/novagraph/setup/rds-ca-2019-root.pem') },
+           connectionLimit: 20,
+         },
+         aws: {
+           bucket: KEYS.S3_BUCKET,
+           accessKey: KEYS.S3_ACCESS,
+           secretKey: KEYS.S3_SECRET,
+           region: KEYS.S3_REGION,
+           snsRegion: KEYS.SNS_REGION,
+         },
+       }),
+       Cognito: new NovaGraph.Cognito({
+         region: KEYS.COGNITO_REGION,
+         cognitoUserPoolId: KEYS.COGNITO_POOL,
+         cognitoIdentityPoolId: KEYS.COGNITO_IDENTITY,
+       }),
+       Constants: new NovaGraph.Constants({
+         objects: OBJECTS,
+         edges: EDGES,
+         status: {
+           VISIBLE: 0,
+           DELETED: 1,
+         },
+       }),
+       Error: NovaGraph.Error,
+     };
+     return instance;
+   };
 
-==USAGE==
-
-You'll like want to verify the identity of the caller. This will return a Viewer object that is
-required by all other callsites.
-
-var viewer = await ViewerUtil.validate(new Cognito(DB), req);
-
-This will confirm the viewer is who they say they are by looking at the 'token' field in the headers of the request.
-THIS REQUIRES THE VIEWER'S PROFILE OBJECT - the only object type forced by this module - TO
-CONTAIN THE COGNITO UUID IN IT'S DATA, under the key cognito_uuid. If you create a profile using the code in NovaGraph, this will be done and protected for you.
-
-To make DB queries see the DB file, but a sample fetch might look like:
-var result = await NovaGraph.DB.getObject(viewer, uuid_to_fetch_object_for);
-
-Objects and edges are wrapped in simple classes called GObject and GEdge. 
+4. import your initialization helper and instantiate it
