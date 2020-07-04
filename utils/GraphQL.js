@@ -303,7 +303,7 @@ async function parseSet(NovaGraph, DB, viewer, object, nodes) {
       if (!objects[object_id]) {
         return;
       }
-      var [more_objects, more_edges, more_edge_counts] = await parseSet(ng, DB, viewer, objects[object_id], node.selectionSet);
+      var [more_objects, more_edges, more_edge_counts] = await parseSet(NovaGraph, DB, viewer, objects[object_id], node.selectionSet);
       Object.keys(more_objects).map(i => objects[i] = more_objects[i]);
       more_edges.forEach(e => edges.push(e));
       more_edge_counts.forEach(e => edge_counts.push(e));
@@ -312,7 +312,7 @@ async function parseSet(NovaGraph, DB, viewer, object, nodes) {
   return [objects, edges, edge_counts];
 }
 
-async function createOrUpdateEdge(ng, DB, viewer, from_id, type, to_id, data) {
+async function createOrUpdateEdge(NovaGraph, DB, viewer, from_id, type, to_id, data) {
   var existing = await DB.getSingleEdge(viewer, from_id, type, to_id);
   if (existing) {
     if (data !== null && data != existing.getData()) {
@@ -331,7 +331,7 @@ async function createOrUpdateEdge(ng, DB, viewer, from_id, type, to_id, data) {
   return await DB.getSingleEdge(viewer, from_id, type, to_id);
 }
 
-async function parseMutationSet(ng, DB, viewer, object, nodes) {
+async function parseMutationSet(NovaGraph, DB, viewer, object, nodes) {
   var objects = {};
   var edges = [];
   if (!nodes || !nodes.selections) {
@@ -390,7 +390,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           throw NError.normal('Invalid edge type', { type: node.name.value });
         }
         result = await Promise.all(to_ids.map(async to_id => {
-          return await createOrUpdateEdge(ng, DB, viewer, object.getID(), edge_type, to_id, data);
+          return await createOrUpdateEdge(NovaGraph, DB, viewer, object.getID(), edge_type, to_id, data);
         }));
         if (!single_to_id) {
           var all_edges = await DB.getEdge(viewer, object.getID(), edge_type);
@@ -404,7 +404,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           if (edge_type === null) {
             throw NError.normal('Invalid edge type', { type: node.name.value });
           }
-          return await createOrUpdateEdge(ng, DB, viewer, from_id, edge_type, object.getID(), data);
+          return await createOrUpdateEdge(NovaGraph, DB, viewer, from_id, edge_type, object.getID(), data);
         }));
       }
       if (delete_to_ids.length > 0) {
@@ -529,7 +529,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
       if (!objects[object_id]) {
         return;
       }
-      var [more_objects, more_edges] = await parseMutationSet(ng, DB, viewer, objects[object_id], node.selectionSet);
+      var [more_objects, more_edges] = await parseMutationSet(NovaGraph, DB, viewer, objects[object_id], node.selectionSet);
       Object.keys(more_objects).map(i => objects[i] = more_objects[i]);
       more_edges.forEach(e => edges.push(e));
     }));
@@ -539,24 +539,24 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
 
 class GraphQL {
 
-  static async execute(ng, DB, viewer, query) {
+  static async execute(NovaGraph, DB, viewer, query) {
     var node = null;
     try {
       node = graphql.parse(query);
     } catch (e){
       throw NError.normal(e.message, e);
     }
-    return await parseSet(ng, DB, viewer, null, node.definitions[0].selectionSet);
+    return await parseSet(NovaGraph, DB, viewer, null, node.definitions[0].selectionSet);
   }
 
-  static async mutate(ng, DB, viewer, query) {
+  static async mutate(NovaGraph, DB, viewer, query) {
     var node = null;
     try {
       node = graphql.parse(query);
     } catch (e){
       throw NError.normal(e.message, e);
     }
-    return await parseMutationSet(ng, DB, viewer, null, node.definitions[0].selectionSet);
+    return await parseMutationSet(NovaGraph, DB, viewer, null, node.definitions[0].selectionSet);
   }
 }
 
