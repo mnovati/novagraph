@@ -13,14 +13,13 @@ class GAllowEdgeDestObjectRule extends GRule {
     if (object.getViewer().isLoggedOut()) {
       return this.skip();
     }
-    const DB = require('../lib/db.js');
     if (!Array.isArray(this.edges)) {
       throw NError.normal('Invalid edges provided to edge-based privacy rule');
     }
     var result = await Promise.all(this.edges.map(async (e) => {
-      var edges = await DB.getEdge(new ReadAllViewer(0), object.getID(), e);
+      var edges = await this.DB.getEdge(new ReadAllViewer(0), object.getID(), e);
       var objects = await Promise.all(edges.map(async (ee) => {
-        var o = await DB.getObject(object.getViewer(), ee.getToID());
+        var o = await this.DB.getObject(object.getViewer(), ee.getToID());
         return !!o;
       }));
       return objects.filter(Boolean).length > 0;

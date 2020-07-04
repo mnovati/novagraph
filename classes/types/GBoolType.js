@@ -6,7 +6,7 @@ class GBoolType extends GType {
     super();
   }
 
-  async checkImpl(viewer, value) {
+  async checkImpl(DB, viewer, value) {
     return value === true || value === false;
   }
 }

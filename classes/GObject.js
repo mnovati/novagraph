@@ -2,7 +2,8 @@ const GAllowAllRule = require('./GAllowAllRule.js');
 
 class GObject {
 
-  constructor(viewer, object) {
+  constructor(constants, viewer, object) {
+    this.Constants = constants;
     this.viewer = viewer;
     this.object = object;
   }
@@ -20,8 +21,7 @@ class GObject {
   }
 
   getAPIType() {
-    const Constants = require('../lib/constants.js');
-    return Constants.Objects[this.getType()].api_name;
+    return this.Constants.Objects[this.getType()].api_name;
   }
 
   async getData() {
@@ -43,52 +43,51 @@ class GObject {
     return Object.assign({}, base);
   }
 
-  async canSeeField(key) {
-    const Constants = require('../lib/constants.js');
+  async canSeeField(DB, key) {
     return await this._can(
-      ((Constants.getObject(this.getType()).field_privacy || {})[key] || Constants.getObject(this.getType()).field_privacy_fallback || {}).cansee || [new GAllowAllRule()]
+      DB, 
+      ((this.Constants.getObject(this.getType()).field_privacy || {})[key] || this.Constants.getObject(this.getType()).field_privacy_fallback || {}).cansee || [new GAllowAllRule()]
     );
   }
 
-  async canModifyField(key) {
-    const Constants = require('../lib/constants.js');
+  async canModifyField(DB, key) {
     return await this._can(
-      ((Constants.getObject(this.getType()).field_privacy || {})[key] || Constants.getObject(this.getType()).field_privacy_fallback || {}).canmodify || [new GAllowAllRule()]
+      DB,
+      ((this.Constants.getObject(this.getType()).field_privacy || {})[key] || this.Constants.getObject(this.getType()).field_privacy_fallback || {}).canmodify || [new GAllowAllRule()]
     );
   }
 
-  async canCreateField(key) {
-    const Constants = require('../lib/constants.js');
-    var config = (Constants.getObject(this.getType()).field_privacy || {})[key] || Constants.getObject(this.getType()).field_privacy_fallback || {};
-    return await this._can(config.cancreate || config.canmodify || [new GAllowAllRule()]);
+  async canCreateField(DB, key) {
+    var config = (this.Constants.getObject(this.getType()).field_privacy || {})[key] || this.Constants.getObject(this.getType()).field_privacy_fallback || {};
+    return await this._can(DB, config.cancreate || config.canmodify || [new GAllowAllRule()]);
   }
 
   // these are functions used internally that shouldn't be overwritten
 
-  async canSee() {
-    const Constants = require('../lib/constants.js');
+  async canSee(DB) {
     return await this._can(
-      (Constants.getObject(this.getType()).privacy || {}).cansee || []
+      DB,
+      (this.Constants.getObject(this.getType()).privacy || {}).cansee || []
     );
   }
 
-  async canCreate() {
-    const Constants = require('../lib/constants.js');
+  async canCreate(DB) {
     return await this._can(
-      (Constants.getObject(this.getType()).privacy || {}).cancreate || []
+      DB,
+      (this.Constants.getObject(this.getType()).privacy || {}).cancreate || []
     );
   }
 
-  async canModify() {
-    const Constants = require('../lib/constants.js');
+  async canModify(DB) {
     return await this._can(
-      (Constants.getObject(this.getType()).privacy || {}).canmodify || []
+      DB,
+      (this.Constants.getObject(this.getType()).privacy || {}).canmodify || []
     );
   }
 
-  async _can(rules, fallback) {
+  async _can(DB, rules, fallback) {
     for (var ii = 0; ii < rules.length; ii++) {
-      var result = await rules[ii].can(this);
+      var result = await rules[ii].withDB(DB).can(this);
       if (result === 'PASS') {
         return true;
       } else if (result === 'FAIL') {

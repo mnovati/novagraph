@@ -6,7 +6,7 @@ class GIntType extends GType {
     super();
   }
 
-  async checkImpl(viewer, value) {
+  async checkImpl(DB, viewer, value) {
     return typeof value === 'number' && isFinite(value) && Number.isInteger(value);
   }
 }

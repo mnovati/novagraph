@@ -1,5 +1,3 @@
-const Constants = require('../lib/constants.js');
-
 class ResponseUtils {
 
   constructor(res, DB) {
@@ -50,7 +48,7 @@ class ResponseUtils {
 			}
 			dedup[key] = true;
 			var raw = await edge.getRaw();
-			raw.type = await edge.getAPIType();
+			raw.type = await edge.getAPIType(this._DB);
 			return raw;
 		}));
 		if ('edge_counts' in out) {
@@ -65,7 +63,7 @@ class ResponseUtils {
 				var object = await this._DB.getObject(read_all_viewer, edge.from_id);
 				edge = Object.assign({}, edge);
         edge.from_type = object.getAPIType();
-				edge.type = (object ? object.getAPIType() : 'null') + '/' + Constants.Edges[edge.type].api_name;
+				edge.type = (object ? object.getAPIType() : 'null') + '/' + this._DB.Constants.Edges[edge.type].api_name;
 				return edge;
 			}));
 			out.edge_counts = out.edge_counts.filter(Boolean);

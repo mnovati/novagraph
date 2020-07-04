@@ -1,4 +1,3 @@
-const Constants = require('../lib/constants.js');
 const WriteAllViewer = require('../classes/WriteAllViewer.js');
 const NError = require('../lib/error.js');
 const NovaError = require('../utils/NovaError.js');
@@ -41,8 +40,8 @@ class DBUtils {
         var [api_object_type, api_edge_type] = edge.type.split('/');
         var edge_from_id = edge.from_id || object_id;
         var edge_to_id = edge.to_id || object_id;
-        var object_type = Constants.getObjectTypeFromName(api_object_type);
-        var edge_type = Constants.getEdgeTypeFromName(object_type, api_edge_type);
+        var object_type = this._DB.Constants.getObjectTypeFromName(api_object_type);
+        var edge_type = this._DB.Constants.getEdgeTypeFromName(object_type, api_edge_type);
         if (!(edge_type in to_check)) {
           to_check[edge_type] = [];
         }
@@ -50,7 +49,7 @@ class DBUtils {
           to_check[edge_type].push(edge_to_id);
         }
         if (edge_to_id === object_id) {
-          var reverse_edge_type = Constants.getReverseEdgeTypeFromName(object_type, api_edge_type);
+          var reverse_edge_type = this._DB.Constants.getReverseEdgeTypeFromName(object_type, api_edge_type);
           if (reverse_edge_type !== null) {
             if (!(reverse_edge_type in to_check)) {
               to_check[reverse_edge_type] = [];
@@ -64,13 +63,13 @@ class DBUtils {
             if (('data' in edge) && edge.data != existing.getData()) {
               var raw_edge = await existing.getRaw();
               raw_edge.data = edge.data;
-              var new_edge = Constants.getEdgeInstance(viewer, raw_edge);
+              var new_edge = this._DB.Constants.getEdgeInstance(viewer, raw_edge);
               await this._DB.modifyEdgeData(viewer, new_edge);
               existing = await this._DB.getSingleEdge(viewer, edge_from_id, edge_type, edge_to_id);
             }
             out_edges.push(existing);
           } else {
-            edges.push(Constants.getEdgeInstance(viewer, {
+            edges.push(this._DB.Constants.getEdgeInstance(viewer, {
               from_id: edge_from_id,
               to_id: edge_to_id,
               type: edge_type,
@@ -140,9 +139,9 @@ class DBUtils {
     if (existing) {
       var raw_edge = await existing.getRaw();
       raw_edge.data = data;
-      await this._DB.modifyEdgeData(viewer, Constants.getEdgeInstance(viewer, raw_edge));
+      await this._DB.modifyEdgeData(viewer, this._DB.Constants.getEdgeInstance(viewer, raw_edge));
     } else {
-      await this._DB.createEdge(viewer, Constants.getEdgeInstance(viewer, {
+      await this._DB.createEdge(viewer, this._DB.Constants.getEdgeInstance(viewer, {
         from_id: from_id,
         to_id: to_id,
         type: edge_type,
@@ -160,15 +159,15 @@ class DBUtils {
     if (object.getType() !== type) {
       throw NError.normal('Object type does not match requested type');
     }
-    var result = await this._DB.setObjectStatus(viewer, object, Constants.Status.DELETED);
+    var result = await this._DB.setObjectStatus(viewer, object, this._DB.Constants.Status.DELETED);
     if (!result) {
       throw NError.normal('Error deleting object');
     }
     await this._DB.quickChangeStatusAllEdges(
       new WriteAllViewer(0),
       object.getID(),
-      Constants.Status.DELETED,
-      Constants.Status.VISIBLE
+      this._DB.Constants.Status.DELETED,
+      this._DB.Constants.Status.VISIBLE
     );
     return true;
   }

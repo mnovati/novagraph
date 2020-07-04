@@ -12,10 +12,9 @@ class GAllowObjectEdgeRule extends GRule {
   }
 
   async can(edge) {
-    const DB = require('../lib/db.js');
     var [dest, source] = await Promise.all([
-      DB.getObject(edge.getViewer(), edge.getToID()),
-      DB.getObject(edge.getViewer(), edge.getFromID()),
+      this.DB.getObject(edge.getViewer(), edge.getToID()),
+      this.DB.getObject(edge.getViewer(), edge.getFromID()),
     ]);
     if (this.type === 'source') {
       return source ? this.pass() : this.skip();

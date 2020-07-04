@@ -1,6 +1,11 @@
 
 class GRule {
 
+  withDB(DB) {
+    this.DB = DB;
+    return this;
+  }
+
   pass() {
     return 'PASS';
   }

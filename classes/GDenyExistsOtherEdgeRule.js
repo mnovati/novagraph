@@ -11,8 +11,7 @@ class GDenyExistsOtherEdgeRule extends GRule {
     if (edge.getViewer().isLoggedOut()) {
       return this.skip();
     }
-    const DB = require('../lib/db.js');
-    var other = await DB.getSingleEdge(
+    var other = await this.DB.getSingleEdge(
       edge.getViewer().getReadAllViewer(),
       edge.getFromID(),
       this.edge,

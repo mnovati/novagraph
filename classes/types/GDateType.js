@@ -6,7 +6,7 @@ class GDateType extends GType {
     super();
   }
 
-  async checkImpl(viewer, value) {
+  async checkImpl(DB, viewer, value) {
     return !isNaN(new Date(value));
   }
 }

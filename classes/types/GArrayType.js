@@ -7,7 +7,7 @@ class GArrayType extends GType {
     this.type = type || null;
   }
 
-  async checkImpl(viewer, value) {
+  async checkImpl(DB, [viewer, value) {
     if (!Array.isArray(value)) {
       return false;
     }
@@ -16,7 +16,7 @@ class GArrayType extends GType {
       return true;
     }
     var each = await Promise.all(value.map(async v => {
-      return await this.type.check(viewer, v);
+      return await this.type.check(DB, viewer, v);
     }));
     return each.filter(Boolean).length === value.length;
   }

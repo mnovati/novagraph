@@ -1,6 +1,7 @@
 class GEdge {
 
-  constructor(viewer, edge) {
+  constructor(constants, viewer, edge) {
+    this.Constants = constants;
     this.viewer = viewer;
     this.edge = edge;
   }
@@ -21,11 +22,9 @@ class GEdge {
     return this.edge.type;
   }
 
-  async getAPIType() {
-    const Constants = require('../lib/constants.js');
-    const DB = require('../lib/db.js');
+  async getAPIType(DB) {
     var object = await DB.getObject(this.getViewer().getReadAllViewer(), this.getFromID());
-    return (object ? object.getAPIType() : 'null') + '/' + Constants.Edges[this.getType()].api_name;
+    return (object ? object.getAPIType() : 'null') + '/' + this.Constants.Edges[this.getType()].api_name;
   }
 
   getData() {
@@ -38,30 +37,30 @@ class GEdge {
 
   // these are functions used internally that shouldn't be overwritten
 
-  async canSee() {
-    const Constants = require('../lib/constants.js');
+  async canSee(DB) {
     return await this._can(
-      (Constants.getEdge(this.getType()).privacy || {}).cansee || []
+      DB,
+      (this.Constants.getEdge(this.getType()).privacy || {}).cansee || []
     );
   }
 
-  async canCreate() {
-    const Constants = require('../lib/constants.js');
+  async canCreate(DB) {
     return await this._can(
-      (Constants.getEdge(this.getType()).privacy || {}).cancreate || []
+      DB,
+      (this.Constants.getEdge(this.getType()).privacy || {}).cancreate || []
     );
   }
 
-  async canModify() {
-    const Constants = require('../lib/constants.js');
+  async canModify(DB) {
     return await this._can(
-      (Constants.getEdge(this.getType()).privacy || {}).canmodify || []
+      DB,
+      (this.Constants.getEdge(this.getType()).privacy || {}).canmodify || []
     );
   }
 
-  async _can(rules) {
+  async _can(DB, rules) {
     for (var ii = 0; ii < rules.length; ii++) {
-      var result = await rules[ii].can(this);
+      var result = await rules[ii].withDB(DB).can(this);
       if (result === 'PASS') {
         return true;
       } else if (result === 'FAIL') {

@@ -8,12 +8,11 @@ class GUUIDType extends GType {
     this.types = types || [];
   }
 
-  async checkImpl(viewer, value) {
+  async checkImpl(DB, viewer, value) {
     if (!uuidValidate(value)) {
       return false;
     }
     if (this.types.length > 0) {
-      const DB = require('../../lib/db.js');
       var object = await DB.getObject(viewer.getReadAllViewer(), value);
       // if object can't be loaded by read-all viewer, it must be deleted
       // so we should ignore this check to prevent failure when editing

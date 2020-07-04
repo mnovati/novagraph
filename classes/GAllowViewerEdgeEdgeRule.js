@@ -17,12 +17,11 @@ class GAllowViewerEdgeEdgeRule extends GRule {
     if (edge.getViewer().isLoggedOut()) {
       return this.skip();
     }
-    const DB = require('../lib/db.js');
     if (!Array.isArray(this.edges)) {
       throw NError.normal('Invalid edges provided to edge-based privacy rule');
     }
     var result = await Promise.all(this.edges.map(async (e) => {
-      var exists = await DB.getSingleEdge(
+      var exists = await this.DB.getSingleEdge(
         new ReadAllViewer(0),
         this.type === 'source' ? edge.getFromID() : edge.getToID(),
         e,

@@ -10,14 +10,14 @@ class GType {
     return this;
   }
 
-  async check(viewer, value) {
+  async check(DB, viewer, value) {
     if (value === null) {
       return !!this.nullable;
     }
-    return await this.checkImpl(viewer, value);
+    return await this.checkImpl(DB, viewer, value);
   }
 
-  async checkImpl(viewer, value) {
+  async checkImpl(DB, viewer, value) {
     return true;
   }
 

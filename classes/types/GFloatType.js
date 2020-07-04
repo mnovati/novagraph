@@ -6,7 +6,7 @@ class GFloatType extends GType {
     super();
   }
 
-  async checkImpl(viewer, value) {
+  async checkImpl(DB, viewer, value) {
     var value = parseFloat(value);
     return typeof value === 'number' && isFinite(value);
   }
