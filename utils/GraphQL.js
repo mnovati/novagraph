@@ -318,10 +318,10 @@ async function createOrUpdateEdge(ng, DB, viewer, from_id, type, to_id, data) {
     if (data !== null && data != existing.getData()) {
       var raw_edge = await existing.getRaw();
       raw_edge.data = data;
-      await DB.modifyEdgeData(viewer, NovaGraph.Constants.getEdgeInstance(viewer, raw_edge));
+      await DB.modifyEdgeData(viewer, NovaGraph.Constants.getEdgeInstance(DB, viewer, raw_edge));
     }
   } else {
-    await DB.createEdge(viewer, NovaGraph.Constants.getEdgeInstance(viewer, {
+    await DB.createEdge(viewer, NovaGraph.Constants.getEdgeInstance(DB, viewer, {
       from_id: from_id,
       to_id: to_id,
       type: type,
@@ -413,7 +413,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           throw NError.normal('Invalid edge type', { type: node.name.value });
         }
         result = await Promise.all(delete_to_ids.map(async to_id => {
-          return await DB.deleteEdge(viewer, NovaGraph.Constants.getEdgeInstance(viewer, {
+          return await DB.deleteEdge(viewer, NovaGraph.Constants.getEdgeInstance(DB, viewer, {
             from_id: object.getID(),
             to_id: to_id,
             type: edge_type,
@@ -431,7 +431,7 @@ async function parseMutationSet(ng, DB, viewer, object, nodes) {
           if (edge_type === null) {
             throw NError.normal('Invalid edge type', { type: node.name.value });
           }
-          return await DB.deleteEdge(viewer, NovaGraph.Constants.getEdgeInstance(viewer, {
+          return await DB.deleteEdge(viewer, NovaGraph.Constants.getEdgeInstance(DB, viewer, {
             from_id: from_id,
             to_id: object.getID(),
             type: edge_type,

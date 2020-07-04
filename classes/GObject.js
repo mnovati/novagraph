@@ -2,7 +2,8 @@ const GAllowAllRule = require('./GAllowAllRule.js');
 
 class GObject {
 
-  constructor(constants, viewer, object) {
+  constructor(DB, constants, viewer, object) {
+    this.DB = DB;
     this.Constants = constants;
     this.viewer = viewer;
     this.object = object;
@@ -43,51 +44,46 @@ class GObject {
     return Object.assign({}, base);
   }
 
-  async canSeeField(DB, key) {
+  async canSeeField(key) {
     return await this._can(
-      DB, 
       ((this.Constants.getObject(this.getType()).field_privacy || {})[key] || this.Constants.getObject(this.getType()).field_privacy_fallback || {}).cansee || [new GAllowAllRule()]
     );
   }
 
-  async canModifyField(DB, key) {
+  async canModifyField(key) {
     return await this._can(
-      DB,
       ((this.Constants.getObject(this.getType()).field_privacy || {})[key] || this.Constants.getObject(this.getType()).field_privacy_fallback || {}).canmodify || [new GAllowAllRule()]
     );
   }
 
-  async canCreateField(DB, key) {
+  async canCreateField(key) {
     var config = (this.Constants.getObject(this.getType()).field_privacy || {})[key] || this.Constants.getObject(this.getType()).field_privacy_fallback || {};
-    return await this._can(DB, config.cancreate || config.canmodify || [new GAllowAllRule()]);
+    return await this._can(config.cancreate || config.canmodify || [new GAllowAllRule()]);
   }
 
   // these are functions used internally that shouldn't be overwritten
 
-  async canSee(DB) {
+  async canSee() {
     return await this._can(
-      DB,
       (this.Constants.getObject(this.getType()).privacy || {}).cansee || []
     );
   }
 
-  async canCreate(DB) {
+  async canCreate() {
     return await this._can(
-      DB,
       (this.Constants.getObject(this.getType()).privacy || {}).cancreate || []
     );
   }
 
-  async canModify(DB) {
+  async canModify() {
     return await this._can(
-      DB,
       (this.Constants.getObject(this.getType()).privacy || {}).canmodify || []
     );
   }
 
-  async _can(DB, rules, fallback) {
+  async _can(rules) {
     for (var ii = 0; ii < rules.length; ii++) {
-      var result = await rules[ii].withDB(DB).can(this);
+      var result = await rules[ii].withDB(this.DB).can(this);
       if (result === 'PASS') {
         return true;
       } else if (result === 'FAIL') {

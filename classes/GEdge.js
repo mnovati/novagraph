@@ -1,6 +1,7 @@
 class GEdge {
 
-  constructor(constants, viewer, edge) {
+  constructor(DB, constants, viewer, edge) {
+    this.DB = DB;
     this.Constants = constants;
     this.viewer = viewer;
     this.edge = edge;
@@ -22,8 +23,8 @@ class GEdge {
     return this.edge.type;
   }
 
-  async getAPIType(DB) {
-    var object = await DB.getObject(this.getViewer().getReadAllViewer(), this.getFromID());
+  async getAPIType() {
+    var object = await this.DB.getObject(this.getViewer().getReadAllViewer(), this.getFromID());
     return (object ? object.getAPIType() : 'null') + '/' + this.Constants.Edges[this.getType()].api_name;
   }
 
@@ -37,30 +38,27 @@ class GEdge {
 
   // these are functions used internally that shouldn't be overwritten
 
-  async canSee(DB) {
+  async canSee() {
     return await this._can(
-      DB,
       (this.Constants.getEdge(this.getType()).privacy || {}).cansee || []
     );
   }
 
-  async canCreate(DB) {
+  async canCreate() {
     return await this._can(
-      DB,
       (this.Constants.getEdge(this.getType()).privacy || {}).cancreate || []
     );
   }
 
-  async canModify(DB) {
+  async canModify() {
     return await this._can(
-      DB,
       (this.Constants.getEdge(this.getType()).privacy || {}).canmodify || []
     );
   }
 
-  async _can(DB, rules) {
+  async _can(rules) {
     for (var ii = 0; ii < rules.length; ii++) {
-      var result = await rules[ii].withDB(DB).can(this);
+      var result = await rules[ii].withDB(this.DB).can(this);
       if (result === 'PASS') {
         return true;
       } else if (result === 'FAIL') {
