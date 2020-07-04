@@ -7,7 +7,7 @@ class GArrayType extends GType {
     this.type = type || null;
   }
 
-  async checkImpl(DB, [viewer, value) {
+  async checkImpl(DB, viewer, value) {
     if (!Array.isArray(value)) {
       return false;
     }
