@@ -76,6 +76,42 @@ class ResponseUtils {
 		}
 		this._res.end();
 	}
+	
+  async sendResponseGraphQL(objects, edges) {
+		edges = edges || [];
+    
+    var edges_by_id = {};
+    await Promise.all(edges.filter(Boolean).map(async (edge) => {
+      var raw = await edge.getRaw();
+      raw.type = await edge.getAPIType(this._DB);
+      if (!(edge.getFromID() in edges_by_id)) {
+        edges_by_id[edge.getFromID()] = [];
+      }
+      edges_by_id[edge.getFromID()].push(raw);
+    }));
+
+    var out = {};
+		await Promise.all(Object.keys(objects).map(async (object_id) => {
+      var raw = await objects[object_id].getRaw();
+      raw.type = objects[object_id].getAPIType();
+      var files = raw.data.files;
+      if (files && files.length > 0) {
+        for (var ii = 0; ii < files.length; ii++) {
+          raw.data.files[ii].path = this._DB.getSignedS3URL(files[ii].id);
+        }
+      }
+      if (object_id in edges_by_id) {
+        raw.edges = edges_by_id[object_id];
+      }
+      out[raw.type].push(raw);
+		}));
+
+		this._res.send({ data: out });
+		for (var ii = 0; ii < ResponseUtils._cleanup.length; ii++) {
+			await ResponseUtils._cleanup[ii](this._DB);
+		}
+		this._res.end();
+	}
 
   static addExpansionCallback(fn) {
     ResponseUtils._expand.push(fn);
