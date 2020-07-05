@@ -103,7 +103,7 @@ class ResponseUtils {
       if (object_id in edges_by_id) {
         raw.edges = edges_by_id[object_id];
       }
-      if (raw.type in out) {
+      if (!(raw.type in out)) {
         out[raw.type] = [];
       }
       out[raw.type].push(raw);
