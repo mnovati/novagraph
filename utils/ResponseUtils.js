@@ -81,13 +81,16 @@ class ResponseUtils {
 		edges = edges || [];
     
     var edges_by_id = {};
+    var edge_objects = {};
     await Promise.all(edges.filter(Boolean).map(async (edge) => {
       var raw = await edge.getRaw();
-      raw.type = await edge.getAPIType(this._DB);
+      raw.type = await edge.getAPIType();
       if (!(edge.getFromID() in edges_by_id)) {
         edges_by_id[edge.getFromID()] = [];
       }
       edges_by_id[edge.getFromID()].push(raw);
+      edge_objects[edge.getToID()] = objects[edge.getToID()];
+      delete objects[edge.getToID()];
     }));
 
     var out = {};
@@ -101,7 +104,12 @@ class ResponseUtils {
         }
       }
       if (object_id in edges_by_id) {
-        raw.edges = edges_by_id[object_id];
+        edges_by_id[object_id].forEach(edge => {
+          if (!(edge.type in raw)) {
+            raw[edge.type] = [];
+          }
+          raw[edge.type].push(edge_objects[edge.to_id]);
+        });
       }
       if (!(raw.type in out)) {
         out[raw.type] = [];

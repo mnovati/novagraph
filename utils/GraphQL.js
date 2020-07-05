@@ -1,6 +1,7 @@
 const graphql = require('graphql/language');
 const uuidValidate = require('uuid-validate');
 const NError = require('../lib/error.js');
+const GEdgePlaceholder = require('../classes/GEdgePlaceholder.js');
 const DBUtils = require('./DBUtils.js');
 
 async function parseSet(NovaGraph, DB, viewer, object, nodes) {
@@ -148,24 +149,29 @@ async function parseSet(NovaGraph, DB, viewer, object, nodes) {
             object_value.forEach(id => {
               if ((typeof id === 'string' || id instanceof String) && uuidValidate(id)) {
                 ids_to_fetch[id] = true;
+                edges.push(getEdgePlaceholder(viewer, object.getAPIType(), object.getID(), node.name.value, id).withDB(DB));
               } else if (typeof id === 'object') {
                 id = id.id;
                 if ((typeof id === 'string' || id instanceof String) && uuidValidate(id)) {
                   ids_to_fetch[id] = true;
+                  edges.push(getEdgePlaceholder(viewer, object.getAPIType(), object.getID(), node.name.value, id).withDB(DB));
                 }
               }
             });
           } else if ((typeof object_value === 'string' || object_value instanceof String) && uuidValidate(object_value)) {
             ids_to_fetch[object_value] = true;
+            edges.push(getEdgePlaceholder(viewer, object.getAPIType(), object.getID(), node.name.value, object_value).withDB(DB));
           } else if (typeof object_value === 'object') {
             var id = object_value.id;
             if ((typeof id === 'string' || id instanceof String) && uuidValidate(id)) {
               ids_to_fetch[id] = true;
+              edges.push(getEdgePlaceholder(viewer, object.getAPIType(), object.getID(), node.name.value, id).withDB(DB));
             }
             var values = Object.values(object_value);
             values.forEach(id => {
               if ((typeof id === 'string' || id instanceof String) && uuidValidate(id)) {
                 ids_to_fetch[id] = true;
+                edges.push(getEdgePlaceholder(viewer, object.getAPIType(), object.getID(), node.name.value, id).withDB(DB));
               }
             });
           } else if (object_value) {
@@ -310,6 +316,14 @@ async function parseSet(NovaGraph, DB, viewer, object, nodes) {
     }));
   }));
   return [objects, edges, edge_counts];
+}
+
+function getEdgePlaceholder(viewer, object_type, object_id, field_name, to_id) {
+  return new GEdgePlaceholder(viewer, {
+    from_id: object_id,
+    to_id: to_id,
+    api_type: `${object_type}/${field_name}`,
+  });
 }
 
 async function createOrUpdateEdge(NovaGraph, DB, viewer, from_id, type, to_id, data) {
