@@ -4,10 +4,11 @@ const NError = require('../lib/error.js');
 const GEdgePlaceholder = require('../classes/GEdgePlaceholder.js');
 const DBUtils = require('./DBUtils.js');
 
-async function parseSet(NovaGraph, DB, viewer, object, nodes) {
+async function parseSet(NovaGraph, DB, viewer, object, nodes, depth) {
   var objects = {};
   var edges = [];
   var edge_counts = [];
+  var tld_ids = [];
   if (!nodes || !nodes.selections) {
     return [objects, edges, edge_counts];
   }
@@ -305,17 +306,20 @@ async function parseSet(NovaGraph, DB, viewer, object, nodes) {
         add = add || (after !== null && fetched[ii].getID() === after);
       }
     }
+    if (depth === 0) {
+      tld_ids = Object.keys(objects);
+    }
     await Promise.all(Object.keys(objects).map(async object_id => {
       if (!objects[object_id]) {
         return;
       }
-      var [more_objects, more_edges, more_edge_counts, _] = await parseSet(NovaGraph, DB, viewer, objects[object_id], node.selectionSet);
+      var [more_objects, more_edges, more_edge_counts, _] = await parseSet(NovaGraph, DB, viewer, objects[object_id], node.selectionSet, depth + 1);
       Object.keys(more_objects).map(i => objects[i] = more_objects[i]);
       more_edges.forEach(e => edges.push(e));
       more_edge_counts.forEach(e => edge_counts.push(e));
     }));
   }));
-  return [objects, edges, edge_counts, Object.keys(objects)];
+  return [objects, edges, edge_counts, tld_ids];
 }
 
 function getEdgePlaceholder(viewer, object_type, object_id, field_name, to_id) {
@@ -560,7 +564,7 @@ class GraphQL {
     } catch (e){
       throw NError.normal(e.message, e);
     }
-    return await parseSet(NovaGraph, DB, viewer, null, node.definitions[0].selectionSet);
+    return await parseSet(NovaGraph, DB, viewer, null, node.definitions[0].selectionSet, 0);
   }
 
   static async mutate(NovaGraph, DB, viewer, query) {
