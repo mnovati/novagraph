@@ -94,6 +94,9 @@ class ResponseUtils {
     }));
 
     const flattenObject = async o => {
+      if (!o) {
+        return null;
+      }
       var raw = await o.getRaw();
       console.error(raw);
       raw.type = o.getAPIType();
@@ -109,7 +112,9 @@ class ResponseUtils {
             raw[edge.type] = [];
           }
           var child = await flattenObject(edge_objects[edge.to_id]);
-          raw[edge.type].push(child);
+          if (child) {
+            raw[edge.type].push(child);
+          }
         }));
       }
       return raw;
