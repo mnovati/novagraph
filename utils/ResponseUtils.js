@@ -90,7 +90,7 @@ class ResponseUtils {
       }
       edges_by_id[edge.getFromID()].push(raw);
       edge_objects[edge.getToID()] = objects[edge.getToID()];
-      delete objects[edge.getToID()];
+      objects[edge.getToID()] = null;
     }));
 
     const flattenObject = async o => {
@@ -98,7 +98,6 @@ class ResponseUtils {
         return null;
       }
       var raw = await o.getRaw();
-      console.error(raw);
       raw.type = o.getAPIType();
       var files = raw.data.files;
       if (files && files.length > 0) {
@@ -121,8 +120,8 @@ class ResponseUtils {
     };
 
     var out = {};
-		await Promise.all(Object.keys(objects).map(async (object_id) => {
-      var raw = await flattenObject(objects[object_id]);
+		await Promise.all(Object.values(objects).filter(Boolean).map(async object => {
+      var raw = await flattenObject(object);
       if (!(raw.type in out)) {
         out[raw.type] = [];
       }
