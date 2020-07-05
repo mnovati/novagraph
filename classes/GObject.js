@@ -41,7 +41,7 @@ class GObject {
     var base = Object.assign({}, this.object);
     base.data = await this.getData();
     base.viewer_data = await this.getViewerData();
-    return base;
+    return Object.assign({}, base);
   }
 
   async canSeeField(key) {
