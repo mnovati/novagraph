@@ -81,7 +81,7 @@ class ResponseUtils {
 		edges = edges || [];
     
     var edges_by_id = {};
-    var edge_objects = {};
+    var skip = {};
     await Promise.all(edges.filter(Boolean).map(async (edge) => {
       var raw = await edge.getRaw();
       raw.type = await edge.getAPIType();
@@ -89,8 +89,7 @@ class ResponseUtils {
         edges_by_id[edge.getFromID()] = [];
       }
       edges_by_id[edge.getFromID()].push(raw);
-      edge_objects[edge.getToID()] = objects[edge.getToID()];
-      objects[edge.getToID()] = null;
+      skip[edge.getToID()] = true;
     }));
 
     const flattenObject = async o => {
@@ -110,7 +109,7 @@ class ResponseUtils {
           if (!(edge.type in raw)) {
             raw[edge.type] = [];
           }
-          var child = await flattenObject(edge_objects[edge.to_id]);
+          var child = await flattenObject(objects[edge.to_id]);
           if (child) {
             raw[edge.type].push(child);
           }
@@ -121,6 +120,9 @@ class ResponseUtils {
 
     var out = {};
 		await Promise.all(Object.values(objects).filter(Boolean).map(async object => {
+      if (object.getID() in skip) {
+        return;
+      }
       var raw = await flattenObject(object);
       if (!(raw.type in out)) {
         out[raw.type] = [];
