@@ -309,13 +309,13 @@ async function parseSet(NovaGraph, DB, viewer, object, nodes) {
       if (!objects[object_id]) {
         return;
       }
-      var [more_objects, more_edges, more_edge_counts] = await parseSet(NovaGraph, DB, viewer, objects[object_id], node.selectionSet);
+      var [more_objects, more_edges, more_edge_counts, _] = await parseSet(NovaGraph, DB, viewer, objects[object_id], node.selectionSet);
       Object.keys(more_objects).map(i => objects[i] = more_objects[i]);
       more_edges.forEach(e => edges.push(e));
       more_edge_counts.forEach(e => edge_counts.push(e));
     }));
   }));
-  return [objects, edges, edge_counts];
+  return [objects, edges, edge_counts, Object.keys(objects)];
 }
 
 function getEdgePlaceholder(viewer, object_type, object_id, field_name, to_id) {
