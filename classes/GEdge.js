@@ -1,10 +1,13 @@
 class GEdge {
 
-  constructor(DB, constants, viewer, edge) {
-    this.DB = DB;
-    this.Constants = constants;
+  constructor(viewer, edge) {
     this.viewer = viewer;
     this.edge = edge;
+  }
+
+  withDB(DB) {
+    this.DB = DB;
+    return this;
   }
 
   getViewer() {
@@ -25,7 +28,7 @@ class GEdge {
 
   async getAPIType() {
     var object = await this.DB.getObject(this.getViewer().getReadAllViewer(), this.getFromID());
-    return (object ? object.getAPIType() : 'null') + '/' + this.Constants.Edges[this.getType()].api_name;
+    return (object ? object.getAPIType() : 'null') + '/' + this.DB.Constants.Edges[this.getType()].api_name;
   }
 
   getData() {
@@ -40,19 +43,19 @@ class GEdge {
 
   async canSee() {
     return await this._can(
-      (this.Constants.getEdge(this.getType()).privacy || {}).cansee || []
+      (this.DB.Constants.getEdge(this.getType()).privacy || {}).cansee || []
     );
   }
 
   async canCreate() {
     return await this._can(
-      (this.Constants.getEdge(this.getType()).privacy || {}).cancreate || []
+      (this.DB.Constants.getEdge(this.getType()).privacy || {}).cancreate || []
     );
   }
 
   async canModify() {
     return await this._can(
-      (this.Constants.getEdge(this.getType()).privacy || {}).canmodify || []
+      (this.DB.Constants.getEdge(this.getType()).privacy || {}).canmodify || []
     );
   }
 

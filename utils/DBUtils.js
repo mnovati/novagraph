@@ -63,18 +63,18 @@ class DBUtils {
             if (('data' in edge) && edge.data != existing.getData()) {
               var raw_edge = await existing.getRaw();
               raw_edge.data = edge.data;
-              var new_edge = this._DB.Constants.getEdgeInstance(this._DB, viewer, raw_edge);
+              var new_edge = this._DB.Constants.getEdgeInstance(viewer, raw_edge).withDB(this._DB);
               await this._DB.modifyEdgeData(viewer, new_edge);
               existing = await this._DB.getSingleEdge(viewer, edge_from_id, edge_type, edge_to_id);
             }
             out_edges.push(existing);
           } else {
-            edges.push(this._DB.Constants.getEdgeInstance(this._DB, viewer, {
+            edges.push(this._DB.Constants.getEdgeInstance(viewer, {
               from_id: edge_from_id,
               to_id: edge_to_id,
               type: edge_type,
               data: (('data' in edge) ? edge.data : '')
-            }));
+            }).withDB(this._DB));
           }
         } catch (e) {
           errors.push(e);
@@ -139,14 +139,14 @@ class DBUtils {
     if (existing) {
       var raw_edge = await existing.getRaw();
       raw_edge.data = data;
-      await this._DB.modifyEdgeData(viewer, this._DB.Constants.getEdgeInstance(this._DB, viewer, raw_edge));
+      await this._DB.modifyEdgeData(viewer, this._DB.Constants.getEdgeInstance(viewer, raw_edge).withDB(this._DB));
     } else {
-      await this._DB.createEdge(viewer, this._DB.Constants.getEdgeInstance(this._DB, viewer, {
+      await this._DB.createEdge(viewer, this._DB.Constants.getEdgeInstance(viewer, {
         from_id: from_id,
         to_id: to_id,
         type: edge_type,
         data: data
-      }));
+      }).withDB(this._DB));
     }
     return await this._DB.getSingleEdge(viewer, from_id, edge_type, to_id);
   }

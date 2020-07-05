@@ -6,7 +6,7 @@ class GStringType extends GType {
     super();
   }
 
-  async checkImpl(DB, viewer, value) {
+  async checkImpl(viewer, value) {
     return typeof value === 'string' || value instanceof String;
   }
 }

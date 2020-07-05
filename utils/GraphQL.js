@@ -318,15 +318,15 @@ async function createOrUpdateEdge(NovaGraph, DB, viewer, from_id, type, to_id, d
     if (data !== null && data != existing.getData()) {
       var raw_edge = await existing.getRaw();
       raw_edge.data = data;
-      await DB.modifyEdgeData(viewer, NovaGraph.Constants.getEdgeInstance(DB, viewer, raw_edge));
+      await DB.modifyEdgeData(viewer, NovaGraph.Constants.getEdgeInstance(viewer, raw_edge).withDB(DB));
     }
   } else {
-    await DB.createEdge(viewer, NovaGraph.Constants.getEdgeInstance(DB, viewer, {
+    await DB.createEdge(viewer, NovaGraph.Constants.getEdgeInstance(viewer, {
       from_id: from_id,
       to_id: to_id,
       type: type,
       data: data === null ? '' : data
-    }));
+    }).withDB(DB));
   }
   return await DB.getSingleEdge(viewer, from_id, type, to_id);
 }
@@ -413,12 +413,12 @@ async function parseMutationSet(NovaGraph, DB, viewer, object, nodes) {
           throw NError.normal('Invalid edge type', { type: node.name.value });
         }
         result = await Promise.all(delete_to_ids.map(async to_id => {
-          return await DB.deleteEdge(viewer, NovaGraph.Constants.getEdgeInstance(DB, viewer, {
+          return await DB.deleteEdge(viewer, NovaGraph.Constants.getEdgeInstance(viewer, {
             from_id: object.getID(),
             to_id: to_id,
             type: edge_type,
             data: data === null ? '' : data
-          }));
+          }).withDB(DB));
         }));
         if (result.filter(Boolean).length !== delete_to_ids.length) {
           throw NError.normal('Error deleting edges', { type: node.name.value, ids: delete_to_ids });
@@ -431,12 +431,12 @@ async function parseMutationSet(NovaGraph, DB, viewer, object, nodes) {
           if (edge_type === null) {
             throw NError.normal('Invalid edge type', { type: node.name.value });
           }
-          return await DB.deleteEdge(viewer, NovaGraph.Constants.getEdgeInstance(DB, viewer, {
+          return await DB.deleteEdge(viewer, NovaGraph.Constants.getEdgeInstance(viewer, {
             from_id: from_id,
             to_id: object.getID(),
             type: edge_type,
             data: data === null ? '' : data
-          }));
+          }).withDB(DB));
         }));
         if (result.filter(Boolean).length !== delete_from_ids.length) {
           throw NError.normal('Error deleting edges', { type: node.name.value, ids: delete_from_ids });

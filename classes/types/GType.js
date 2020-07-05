@@ -5,19 +5,24 @@ class GType {
     this.nullable = false;
   }
 
+  withDB(DB) {
+    this.DB = DB;
+    return this;
+  }
+
   setNull() {
     this.nullable = true;
     return this;
   }
 
-  async check(DB, viewer, value) {
+  async check(viewer, value) {
     if (value === null) {
       return !!this.nullable;
     }
-    return await this.checkImpl(DB, viewer, value);
+    return await this.checkImpl(viewer, value);
   }
 
-  async checkImpl(DB, viewer, value) {
+  async checkImpl(viewer, value) {
     return true;
   }
 

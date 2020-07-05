@@ -2,12 +2,16 @@ const GAllowAllRule = require('./GAllowAllRule.js');
 
 class GObject {
 
-  constructor(DB, constants, viewer, object) {
-    this.DB = DB;
-    this.Constants = constants;
+  constructor(viewer, object) {
     this.viewer = viewer;
     this.object = object;
+    this.DB = null;
   }
+
+  withDB(DB) {
+    this.DB = DB;
+    return this;
+  } 
 
   getViewer() {
     return this.viewer;
@@ -22,7 +26,7 @@ class GObject {
   }
 
   getAPIType() {
-    return this.Constants.Objects[this.getType()].api_name;
+    return this.DB.Constants.Objects[this.getType()].api_name;
   }
 
   async getData() {
@@ -46,18 +50,18 @@ class GObject {
 
   async canSeeField(key) {
     return await this._can(
-      ((this.Constants.getObject(this.getType()).field_privacy || {})[key] || this.Constants.getObject(this.getType()).field_privacy_fallback || {}).cansee || [new GAllowAllRule()]
+      ((this.DB.Constants.getObject(this.getType()).field_privacy || {})[key] || this.DB.Constants.getObject(this.getType()).field_privacy_fallback || {}).cansee || [new GAllowAllRule()]
     );
   }
 
   async canModifyField(key) {
     return await this._can(
-      ((this.Constants.getObject(this.getType()).field_privacy || {})[key] || this.Constants.getObject(this.getType()).field_privacy_fallback || {}).canmodify || [new GAllowAllRule()]
+      ((this.DB.Constants.getObject(this.getType()).field_privacy || {})[key] || this.DB.Constants.getObject(this.getType()).field_privacy_fallback || {}).canmodify || [new GAllowAllRule()]
     );
   }
 
   async canCreateField(key) {
-    var config = (this.Constants.getObject(this.getType()).field_privacy || {})[key] || this.Constants.getObject(this.getType()).field_privacy_fallback || {};
+    var config = (this.DB.Constants.getObject(this.getType()).field_privacy || {})[key] || this.DB.Constants.getObject(this.getType()).field_privacy_fallback || {};
     return await this._can(config.cancreate || config.canmodify || [new GAllowAllRule()]);
   }
 
@@ -65,19 +69,19 @@ class GObject {
 
   async canSee() {
     return await this._can(
-      (this.Constants.getObject(this.getType()).privacy || {}).cansee || []
+      (this.DB.Constants.getObject(this.getType()).privacy || {}).cansee || []
     );
   }
 
   async canCreate() {
     return await this._can(
-      (this.Constants.getObject(this.getType()).privacy || {}).cancreate || []
+      (this.DB.Constants.getObject(this.getType()).privacy || {}).cancreate || []
     );
   }
 
   async canModify() {
     return await this._can(
-      (this.Constants.getObject(this.getType()).privacy || {}).canmodify || []
+      (this.DB.Constants.getObject(this.getType()).privacy || {}).canmodify || []
     );
   }
 

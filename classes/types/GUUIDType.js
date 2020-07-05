@@ -8,12 +8,12 @@ class GUUIDType extends GType {
     this.types = types || [];
   }
 
-  async checkImpl(DB, viewer, value) {
+  async checkImpl(viewer, value) {
     if (!uuidValidate(value)) {
       return false;
     }
     if (this.types.length > 0) {
-      var object = await DB.getObject(viewer.getReadAllViewer(), value);
+      var object = await this.DB.getObject(viewer.getReadAllViewer(), value);
       // if object can't be loaded by read-all viewer, it must be deleted
       // so we should ignore this check to prevent failure when editing
       // objects referencing deleted ids

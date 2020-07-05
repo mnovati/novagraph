@@ -7,7 +7,7 @@ class GObjectType extends GType {
     this.schema = schema || {};
   }
 
-  async checkImpl(DB, viewer, value) {
+  async checkImpl(viewer, value) {
     if (!(value instanceof Object)) {
       return false;
     }
@@ -15,7 +15,7 @@ class GObjectType extends GType {
     await Promise.all(Object.keys(this.schema).map(async key => {
       if (!out) { return; }
       if (key in value) {
-        var result = await this.schema[key].check(DB, viewer, value[key]);
+        var result = await this.schema[key].withDB(this.DB).check(viewer, value[key]);
         if (!result) {
           out = false;
         }
