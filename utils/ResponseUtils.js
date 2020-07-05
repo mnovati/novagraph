@@ -76,7 +76,7 @@ class ResponseUtils {
 		}
 		this._res.end();
 	}
-	
+
   async sendResponseGraphQL(objects, edges) {
 		edges = edges || [];
     
@@ -93,24 +93,31 @@ class ResponseUtils {
       delete objects[edge.getToID()];
     }));
 
-    var out = {};
-		await Promise.all(Object.keys(objects).map(async (object_id) => {
-      var raw = await objects[object_id].getRaw();
-      raw.type = objects[object_id].getAPIType();
+    const flattenObject = async o => {
+      var raw = await o.getRaw();
+      console.error(raw);
+      raw.type = o.getAPIType();
       var files = raw.data.files;
       if (files && files.length > 0) {
         for (var ii = 0; ii < files.length; ii++) {
           raw.data.files[ii].path = this._DB.getSignedS3URL(files[ii].id);
         }
       }
-      if (object_id in edges_by_id) {
-        edges_by_id[object_id].forEach(edge => {
+      if (o.getID() in edges_by_id) {
+        await Promise.all(edges_by_id[o.getID()].map(async edge => {
           if (!(edge.type in raw)) {
             raw[edge.type] = [];
           }
-          raw[edge.type].push(edge_objects[edge.to_id]);
-        });
+          var child = await flattenObject(edge_objects[edge.to_id]);
+          raw[edge.type].push(child);
+        }));
       }
+      return raw;
+    };
+
+    var out = {};
+		await Promise.all(Object.keys(objects).map(async (object_id) => {
+      var raw = await flattenObject(objects[object_id]);
       if (!(raw.type in out)) {
         out[raw.type] = [];
       }
