@@ -52,7 +52,7 @@ class ResponseUtils {
 			}
 			dedup[key] = true;
 			var raw = await edge.getRaw();
-			raw.type = await edge.getAPIType(this._DB);
+			raw.type = await edge.getAPIType();
 			return raw;
 		}));
 		if ('edge_counts' in out) {
