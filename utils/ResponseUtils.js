@@ -4,6 +4,10 @@ class ResponseUtils {
     this._res = res;
     this._DB = DB;
   }
+  
+  async sendResponseError(error) {
+    await this.sendResponse({}, [], { error: error });
+  }
 
   async sendResponseSingle(object, additional) {
     var objects = {};
