@@ -114,10 +114,11 @@ class ResponseUtils {
             raw[edge.type] = [];
           }
           var child = await flattenObject(objects[edge.to_id]);
-          if (child) {
-            child.edge = edge;
-            raw[edge.type].push(child);
+          if (!child) {
+            child = { id: edge.to_id };
           }
+          child.edge = edge;
+          raw[edge.type].push(child);
         }));
       }
       return raw;
