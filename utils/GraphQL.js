@@ -349,9 +349,10 @@ async function createOrUpdateEdge(NovaGraph, DB, viewer, from_id, type, to_id, d
   return await DB.getSingleEdge(viewer, from_id, type, to_id);
 }
 
-async function parseMutationSet(NovaGraph, DB, viewer, object, nodes) {
+async function parseMutationSet(NovaGraph, DB, viewer, object, nodes, depth) {
   var objects = {};
   var edges = [];
+  var tld_ids = [];
   if (!nodes || !nodes.selections) {
     return [objects, edges];
   }
@@ -543,16 +544,19 @@ async function parseMutationSet(NovaGraph, DB, viewer, object, nodes) {
         }
       }));
     }
+    if (depth === 0) {
+      tld_ids = Object.keys(objects);
+    }
     await Promise.all(Object.keys(objects).map(async object_id => {
       if (!objects[object_id]) {
         return;
       }
-      var [more_objects, more_edges] = await parseMutationSet(NovaGraph, DB, viewer, objects[object_id], node.selectionSet);
+      var [more_objects, more_edges, _] = await parseMutationSet(NovaGraph, DB, viewer, objects[object_id], node.selectionSet, depth + 1);
       Object.keys(more_objects).map(i => objects[i] = more_objects[i]);
       more_edges.forEach(e => edges.push(e));
     }));
   }));
-  return [objects, edges];
+  return [objects, edges, tld_ids];
 }
 
 class GraphQL {
@@ -574,7 +578,7 @@ class GraphQL {
     } catch (e){
       throw NError.normal(e.message, e);
     }
-    return await parseMutationSet(NovaGraph, DB, viewer, null, node.definitions[0].selectionSet);
+    return await parseMutationSet(NovaGraph, DB, viewer, null, node.definitions[0].selectionSet, 0);
   }
 }
 
