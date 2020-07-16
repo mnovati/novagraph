@@ -128,7 +128,7 @@ class ResponseUtils {
           raw[edge.type].push(child);
         }));
         (edges_count_by_id[o.getID()] || []).forEach(edge => {
-          var edge_type = `${o.getAPITyp[e()}/${this._DB.Constants.Edges[edge.type].api_name}/count`;
+          var edge_type = `${o.getAPIType()}/${this._DB.Constants.Edges[edge.type].api_name}/count`;
           edge.type = this._DB.Constants.Edges[edge.type].api_name;
           raw[edge_type] = edge;
         });
