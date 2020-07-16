@@ -81,10 +81,11 @@ class ResponseUtils {
 		this._res.end();
 	}
 
-  async sendResponseGraphQL(objects, edges, tld_ids) {
+  async sendResponseGraphQL(objects, edges, edge_counts, tld_ids) {
 		edges = edges || [];
     
     var edges_by_id = {};
+    var edges_count_by_id = {};
     var skip = {};
     await Promise.all(edges.filter(Boolean).map(async (edge) => {
       var raw = await edge.getRaw();
@@ -94,6 +95,12 @@ class ResponseUtils {
       }
       edges_by_id[edge.getFromID()].push(raw);
     }));
+    edge_counts.filter(Boolean).map(edge => {
+      if (!(edge.from_id in edges_count_by_id)) {
+        edges_count_by_id[edge.from_id] = [];
+      }
+      edges_count_by_id[edge.from_id].push(edge);
+    });
 
     const flattenObject = async o => {
       if (!o) {
@@ -120,6 +127,11 @@ class ResponseUtils {
           child.edge = edge;
           raw[edge.type].push(child);
         }));
+        (edges_count_by_id[o.getID()] || []).forEach(edge => {
+          var edge_type = `${o.object.getAPIType()}/${this._DB.Constants.Edges[edge.type].api_name}/count`;
+          edge.type = this._DB.Constants.Edges[edge.type].api_name;
+          raw[edge_type] = edge;
+        });
       }
       return raw;
     };
