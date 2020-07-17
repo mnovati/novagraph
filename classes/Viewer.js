@@ -33,6 +33,7 @@ class Viewer {
   }
 
   setCache(key, value) {
+    delete this.pending[key];
     this.cache[key] = value;
   }
 
@@ -49,10 +50,6 @@ class Viewer {
 
   setPending(key) {
     this.pending[key] = true;
-  }
-
-  deletePending(key) {
-    delete this.pending[key];
   }
 
   _incrQueryCount() {
