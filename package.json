@@ -9,11 +9,12 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "aws-cloudfront-sign": "^2.2.0",
     "aws-sdk": "^2.709.0",
     "delay": "^3.1.0",
     "graphql": "^15.2.0",
-    "jwks-rsa": "^1.4.0",
     "jsonwebtoken": "^8.4.0",
+    "jwks-rsa": "^1.4.0",
     "mysql2": "^2.1.0",
     "phone": "^2.3.5",
     "sharp": "^0.25.4",
