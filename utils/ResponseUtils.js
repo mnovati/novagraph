@@ -138,6 +138,7 @@ class ResponseUtils {
 
     var out = {};
 		await Promise.all(tld_ids.map(async object_id => {
+      skip = {};
       var raw = await flattenObject(objects[object_id]);
       if (!raw) {
         return;
