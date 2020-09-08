@@ -86,7 +86,6 @@ class ResponseUtils {
     
     var edges_by_id = {};
     var edges_count_by_id = {};
-    var skip = {};
     await Promise.all(edges.filter(Boolean).map(async (edge) => {
       var raw = await edge.getRaw();
       raw.type = await edge.getAPIType();
@@ -102,7 +101,7 @@ class ResponseUtils {
       edges_count_by_id[edge.from_id].push(edge);
     });
 
-    const flattenObject = async o => {
+    const flattenObject = async (o, skip) => {
       if (!o) {
         return null;
       }
@@ -115,12 +114,11 @@ class ResponseUtils {
         }
       }
       if (o.getID() in edges_by_id && !(o.getID() in skip)) {
-        skip[o.getID()] = true;
         await Promise.all(edges_by_id[o.getID()].map(async edge => {
           if (!(edge.type in raw)) {
             raw[edge.type] = [];
           }
-          var child = await flattenObject(objects[edge.to_id]);
+          var child = await flattenObject(objects[edge.to_id], { ...skip, [skip[o.getID()]]: true });
           if (!child) {
             child = { id: edge.to_id };
           }
@@ -138,8 +136,7 @@ class ResponseUtils {
 
     var out = {};
 		await Promise.all(tld_ids.map(async object_id => {
-      skip = {};
-      var raw = await flattenObject(objects[object_id]);
+      var raw = await flattenObject(objects[object_id], {});
       if (!raw) {
         return;
       }
